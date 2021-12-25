@@ -1,3 +1,4 @@
 e-Paper/*
 bcm2835-1.60/*
 .vscode/*
+*__pycache__/*

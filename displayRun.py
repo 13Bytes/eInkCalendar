@@ -20,8 +20,9 @@ FONT_DICT = os.path.join(CURRENT_DICT, 'fonts')
 
 DEBUG = True
 
-FONT_ROBOTO = ImageFont.truetype(
-    os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 16)
+FONT_ROBOTO_H1 = ImageFont.truetype(
+    os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 40)
+LINE_WIDTH = 3
 
 
 def main():
@@ -38,7 +39,7 @@ def main():
         draw_blk = ImageDraw.Draw(image_blk)
         draw_red = ImageDraw.Draw(image_red)
 
-        draw_content(draw_blk, draw_red)
+        draw_content(draw_blk, draw_red, epd.width, epd.height)
         render_content(epd, image_blk, image_red)
 
     except Exception as e:
@@ -49,21 +50,21 @@ def main():
         raise e
 
 
-def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw):
+def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width: int):
     now = time.localtime()
     max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
     day_str = time.strftime("%A")
     day_number = now.tm_mday
     month_str = time.strftime("%B") + ' ' + time.strftime("%Y")
 
-    draw_blk.line((60, 90, 10, 140), fill=0)
-    draw_red.text((2, 0), 'hello world', font=FONT_ROBOTO, fill=0)
-    draw_blk.rectangle((245, 0, 640, 55), fill=0)
+    # Date-Text
+    with_day_number, _ = FONT_ROBOTO_H1.getsize(str(day_number))
+    draw_blk.text((width/2 - with_day_number/2, 0),
+                  str(day_number), font=FONT_ROBOTO_H1, fill=0)
 
-    draw_blk.line((140, 75, 190, 75), fill=0)
-    draw_blk.arc((140, 50, 190, 100), 0, 360, fill=0)
-    draw_blk.rectangle((80, 50, 130, 100), fill=0)
-    draw_blk.chord((200, 50, 250, 100), 0, 360, fill=0)
+    draw_blk.line((0, height/15, width, height/15), fill=0, width=LINE_WIDTH)
+    draw_blk.arc((0, 0, height/15, height/15), 0,
+                 360, fill=0, width=LINE_WIDTH)
 
 
 def render_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):

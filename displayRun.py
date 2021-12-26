@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 import lib.epd7in5b_V2 as eInk
 from PIL import Image, ImageDraw, ImageFont
+from PIL.ImageDraw import ImageDraw as TImageDraw
+from PIL.Image import Image as TImage
 import sys
 import os
 import logging
 import schedule
 import time
+import calendar
 from displayHelpers import *
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
@@ -30,12 +33,13 @@ def main():
         else:
             init_display(epd)
 
-        image_blk = Image.open(os.path.join(PICTURE_DICT, 'blank.bmp'))
-        image_red = Image.open(os.path.join(PICTURE_DICT, 'blank.bmp'))
+        image_blk =  Image.new('1', (epd.height, epd.width),255)
+        image_red = Image.new('1', (epd.height, epd.width),255)
         draw_blk = ImageDraw.Draw(image_blk)
         draw_red = ImageDraw.Draw(image_red)
 
-        display_content(epd, image_blk, image_red)
+        draw_content(draw_blk, draw_red)
+        render_content(epd, image_blk, image_red)
 
     except Exception as e:
         logger.warning(e)
@@ -45,7 +49,24 @@ def main():
         raise e
 
 
-def display_content(epd, image_blk, image_red):
+def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw):
+    now = time.localtime()
+    max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
+    day_str = time.strftime("%A")
+    day_number = now.tm_mday
+    month_str = time.strftime("%B") + ' ' + time.strftime("%Y")
+
+    draw_blk.line((60, 90, 10, 140), fill=0)
+    draw_red.text((2, 0), 'hello world', font=FONT_ROBOTO, fill=0)
+    draw_blk.rectangle((245, 0, 640, 55), fill=0)
+
+    draw_blk.line((140, 75, 190, 75), fill=0)
+    draw_blk.arc((140, 50, 190, 100), 0, 360, fill=0)
+    draw_blk.rectangle((80, 50, 130, 100), fill=0)
+    draw_blk.chord((200, 50, 250, 100), 0, 360, fill=0)
+
+
+def render_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
     if DEBUG:
         logger.info("exporting finial images")
         image_blk.save("EXPORT-black.bmp")

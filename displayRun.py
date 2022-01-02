@@ -20,8 +20,14 @@ FONT_DICT = os.path.join(CURRENT_DICT, 'fonts')
 
 DEBUG = True
 
+FONT_ROBOTO_DATE = ImageFont.truetype(
+    os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 200)
 FONT_ROBOTO_H1 = ImageFont.truetype(
     os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 40)
+FONT_ROBOTO_H2 = ImageFont.truetype(
+    os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 30)
+FONT_ROBOTO_P = ImageFont.truetype(
+    os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 20)
 LINE_WIDTH = 3
 
 
@@ -34,8 +40,8 @@ def main():
         else:
             init_display(epd)
 
-        image_blk =  Image.new('1', (epd.height, epd.width),255)
-        image_red = Image.new('1', (epd.height, epd.width),255)
+        image_blk = Image.new('1', (epd.height, epd.width), 255)
+        image_red = Image.new('1', (epd.height, epd.width), 255)
         draw_blk = ImageDraw.Draw(image_blk)
         draw_red = ImageDraw.Draw(image_red)
 
@@ -51,20 +57,53 @@ def main():
 
 
 def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width: int):
+    PADDING_L = width/10
     now = time.localtime()
     max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
     day_str = time.strftime("%A")
     day_number = now.tm_mday
-    month_str = time.strftime("%B") + ' ' + time.strftime("%Y")
+    month_str = time.strftime("%B")
 
-    # Date-Text
-    with_day_number, _ = FONT_ROBOTO_H1.getsize(str(day_number))
-    draw_blk.text((width/2 - with_day_number/2, 0),
-                  str(day_number), font=FONT_ROBOTO_H1, fill=0)
+    # draw_text_centered(str(day_number), (width/2, 0), draw_blk, FONT_ROBOTO_H1)
 
-    draw_blk.line((0, height/15, width, height/15), fill=0, width=LINE_WIDTH)
-    draw_blk.arc((0, 0, height/15, height/15), 0,
-                 360, fill=0, width=LINE_WIDTH)
+    # Heading
+    line_height = height/20
+    draw_blk.line((PADDING_L, line_height, width, line_height),
+                  fill=0, width=LINE_WIDTH)
+    draw_blk.text((PADDING_L, line_height), month_str.upper(),
+                  font=FONT_ROBOTO_H2, fill=0)
+    line_height += get_font_height(FONT_ROBOTO_H2)
+
+    # Date
+    current_font_height = get_font_height(FONT_ROBOTO_DATE)
+    draw_blk.text((PADDING_L, line_height - current_font_height/10),
+                  str(day_number), font=FONT_ROBOTO_DATE, fill=0)
+    line_height += current_font_height
+
+    # Month-Overview
+    line_height += height/100
+    day_of_month = str(day_number) + "/" + str(max_days_in_month)
+    draw_blk.text((PADDING_L, line_height), day_of_month,
+                  font=FONT_ROBOTO_P, fill=0)
+
+    tmp_right_aligned = width - \
+        get_font_width(FONT_ROBOTO_P, day_str) - get_font_height(FONT_ROBOTO_P)
+    draw_blk.text((tmp_right_aligned, line_height), day_str.upper(),
+                  font=FONT_ROBOTO_P, fill=0)
+
+    line_height += get_font_height(FONT_ROBOTO_P) + height/100
+    draw_blk.line((PADDING_L, line_height, width, line_height),
+                  fill=0, width=LINE_WIDTH)
+
+    # Month-Tally-Overview
+    line_height += height/100
+    tally_height = height/40
+    tally_padding = width/60
+    x_position = PADDING_L + LINE_WIDTH/2
+    for i in range(0, day_number):
+        draw_blk.line((x_position, line_height, x_position, line_height + tally_height), fill=0, width=LINE_WIDTH)
+        x_position += tally_padding
+    line_height += tally_height
 
 
 def render_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):

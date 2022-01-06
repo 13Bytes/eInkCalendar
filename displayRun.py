@@ -37,16 +37,17 @@ def main():
 
         if DEBUG:
             logger.info("DEBUG-Mode activated...")
-        else:
-            init_display(epd)
 
-        image_blk = Image.new('1', (epd.height, epd.width), 255)
-        image_red = Image.new('1', (epd.height, epd.width), 255)
+        image_blk = Image.open(os.path.join(
+            PICTURE_DICT, "blank-aperture.bmp"))
+        image_red = Image.open(os.path.join(
+            PICTURE_DICT, "blank-hk.bmp"))
+
         draw_blk = ImageDraw.Draw(image_blk)
         draw_red = ImageDraw.Draw(image_red)
 
-        draw_content(draw_blk, draw_red, epd.width, epd.height)
-        render_content(epd, image_blk, image_red)
+        render_content(draw_blk, draw_red, epd.width, epd.height)
+        show_content(epd, image_blk, image_red)
 
     except Exception as e:
         logger.warning(e)
@@ -56,7 +57,7 @@ def main():
         raise e
 
 
-def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width: int):
+def render_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width: int):
     PADDING_L = width/10
     now = time.localtime()
     max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
@@ -69,31 +70,30 @@ def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width
     # Heading
     line_height = height/20
     draw_blk.line((PADDING_L, line_height, width, line_height),
-                  fill=0, width=LINE_WIDTH)
+                  fill=1, width=LINE_WIDTH)
     draw_blk.text((PADDING_L, line_height), month_str.upper(),
-                  font=FONT_ROBOTO_H2, fill=0)
+                  font=FONT_ROBOTO_H2, fill=1)
     line_height += get_font_height(FONT_ROBOTO_H2)
 
     # Date
     current_font_height = get_font_height(FONT_ROBOTO_DATE)
     draw_blk.text((PADDING_L, line_height - current_font_height/10),
-                  str(day_number), font=FONT_ROBOTO_DATE, fill=0)
+                  str(day_number), font=FONT_ROBOTO_DATE, fill=1)
     line_height += current_font_height
 
-    # Month-Overview
+    # Month-Overview (with day-string)
     line_height += height/100
     day_of_month = str(day_number) + "/" + str(max_days_in_month)
     draw_blk.text((PADDING_L, line_height), day_of_month,
-                  font=FONT_ROBOTO_P, fill=0)
+                  font=FONT_ROBOTO_P, fill=1)
 
-    tmp_right_aligned = width - \
-        get_font_width(FONT_ROBOTO_P, day_str) - get_font_height(FONT_ROBOTO_P)
+    tmp_right_aligned = width - get_font_width(FONT_ROBOTO_P, day_str.upper()) - PADDING_L/4
     draw_blk.text((tmp_right_aligned, line_height), day_str.upper(),
-                  font=FONT_ROBOTO_P, fill=0)
+                  font=FONT_ROBOTO_P, fill=1)
 
     line_height += get_font_height(FONT_ROBOTO_P) + height/100
     draw_blk.line((PADDING_L, line_height, width, line_height),
-                  fill=0, width=LINE_WIDTH)
+                  fill=1, width=LINE_WIDTH)
 
     # Month-Tally-Overview
     line_height += height/100
@@ -101,19 +101,30 @@ def draw_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width
     tally_padding = width/60
     x_position = PADDING_L + LINE_WIDTH/2
     for i in range(0, day_number):
-        draw_blk.line((x_position, line_height, x_position, line_height + tally_height), fill=0, width=LINE_WIDTH)
+        draw_blk.line((x_position, line_height, x_position,
+                      line_height + tally_height), fill=1, width=LINE_WIDTH)
         x_position += tally_padding
     line_height += tally_height
 
 
-def render_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
+def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
     if DEBUG:
         logger.info("exporting finial images")
         image_blk.save("EXPORT-black.bmp")
         image_red.save("EXPORT-red.bmp")
     else:
+        init_display(epd)
         logger.info("writing on display")
         epd.display(epd.getbuffer(image_blk), epd.getbuffer(image_red))
+        set_sleep(epd)
+
+
+def clear_content(epd: eInk.EPD):
+    if DEBUG:
+        logger.warning("clear has no effect while debugging")
+    else:
+        init_display(epd)
+        clear_display(epd)
         set_sleep(epd)
 
 

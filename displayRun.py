@@ -25,7 +25,7 @@ CURRENT_DICT = os.path.dirname(os.path.realpath(__file__))
 PICTURE_DICT = os.path.join(CURRENT_DICT, 'pictures')
 FONT_DICT = os.path.join(CURRENT_DICT, 'fonts')
 
-DEBUG = True
+DEBUG = False
 
 FONT_ROBOTO_DATE = ImageFont.truetype(
     os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 200)
@@ -180,11 +180,10 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
 
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
-    if DEBUG:
-        logger.info("Exporting finial images")
-        image_blk.save("EXPORT-black.bmp")
-        image_red.save("EXPORT-red.bmp")
-    else:
+    logger.info("Exporting finial images")
+    image_blk.save("EXPORT-black.bmp")
+    image_red.save("EXPORT-red.bmp")
+    if not DEBUG:
         init_display(epd)
         logger.info("Writing on display")
         epd.display(epd.getbuffer(image_blk), epd.getbuffer(image_red))

@@ -16,13 +16,17 @@ def sort_by_date(e: Event):
 
 
 def get_events(max_number: int) -> List[Event]:
-    logger.info("Retrieving calendar infos")
-    event_list = events(WEBDAV_URL, fix_apple=WEBDAV_IS_APPLE)
-    event_list.sort(key=sort_by_date)
-    logger.info(
-        "Got {} calendar-entries (capped to {})".format(len(event_list), max_number))
+    try:
+        logger.info("Retrieving calendar infos")
+        event_list = events(WEBDAV_URL, fix_apple=WEBDAV_IS_APPLE)
+        event_list.sort(key=sort_by_date)
+        logger.info(
+            "Got {} calendar-entries (capped to {})".format(len(event_list), max_number))
+        return event_list[:max_number]
 
-    return event_list[:max_number]
+    except Exception as e:
+        logger.critical(e)
+        return []
 
 
 def check_for_birthday(events: List[Event]) -> bool:

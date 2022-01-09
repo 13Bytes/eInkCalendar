@@ -16,6 +16,7 @@ from PIL.ImageDraw import ImageDraw as TImageDraw
 import lib.epd7in5b_V2 as eInk
 from dataHelper import get_events
 from displayHelpers import *
+from settings import LOCALE
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
 logger = logging.getLogger('app')
@@ -69,7 +70,7 @@ def main():
 
 
 def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDraw, image_red: TImage, height: int, width: int):
-    locale.setlocale(locale.LC_ALL, "de_DE")
+    locale.setlocale(locale.LC_ALL, LOCALE)
 
     PADDING_L = int(width/10)
     PADDING_TOP = int(height/100)

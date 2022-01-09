@@ -1,2 +1,3 @@
 WEBDAV_URL = "webcal://..."
 WEBDAV_IS_APPLE = True
+LOCALE = "de_DE"

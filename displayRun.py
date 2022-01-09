@@ -14,11 +14,11 @@ from PIL.Image import Image as TImage
 from PIL.ImageDraw import ImageDraw as TImageDraw
 
 import lib.epd7in5b_V2 as eInk
-from dataHelper import get_events
+from dataHelper import get_events, get_birthdays
 from displayHelpers import *
 from settings import LOCALE
 
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "DEBUG"))
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 logger = logging.getLogger('app')
 
 CURRENT_DICT = os.path.dirname(os.path.realpath(__file__))
@@ -160,28 +160,40 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
     current_height += PADDING_TOP
 
     y = PADDING_L
-
-    for image in get_portal_images(bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1))):
+    bithday_persons = get_birthdays()
+    draw_cake = (len(bithday_persons) > 0)
+    max_image_height = 0
+    for image in get_portal_images(draw_cake, bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1))):
         image_blk.paste(image, (y, current_height))
-        image_width, _ = image.size
+        image_width, image_height = image.size
         y += image_width + PADDING_TOP
+        max_image_height = image_height if (
+            image_height > max_image_height) else max_image_height
+    current_height += max_image_height + PADDING_TOP
+    # Draw name of birthday-person
+    if draw_cake:
+        bithday_person_string = ", ".join(bithday_persons)
+        draw_red.text((PADDING_L, current_height), bithday_person_string,
+                      font=FONT_ROBOTO_P, fill=1)
+        current_height += get_font_height(FONT_ROBOTO_P)
+
 
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
     if DEBUG:
-        logger.info("exporting finial images")
+        logger.info("Exporting finial images")
         image_blk.save("EXPORT-black.bmp")
         image_red.save("EXPORT-red.bmp")
     else:
         init_display(epd)
-        logger.info("writing on display")
+        logger.info("Writing on display")
         epd.display(epd.getbuffer(image_blk), epd.getbuffer(image_red))
         set_sleep(epd)
 
 
 def clear_content(epd: eInk.EPD):
     if DEBUG:
-        logger.warning("clear has no effect while debugging")
+        logger.warning("Clear has no effect while debugging")
     else:
         init_display(epd)
         clear_display(epd)

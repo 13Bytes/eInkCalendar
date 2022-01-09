@@ -1,3 +1,8 @@
-WEBDAV_URL = "webcal://..."
-WEBDAV_IS_APPLE = True
 LOCALE = "de_DE"
+
+WEBDAV_CALENDAR_URL = "webcal://..."
+WEBDAV_IS_APPLE = True
+
+CALDAV_CONTACT_URL = "https://..."
+CALDAV_CONTACT_USER = "username"
+CALDAV_CONTACT_PWD = "passw0rd"

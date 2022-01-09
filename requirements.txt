@@ -1,2 +1,4 @@
 icalevents
 numpy
+vobject
+lxml

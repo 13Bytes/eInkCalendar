@@ -1,8 +1,10 @@
-import lib.epd7in5b_V2 as eInk
-from PIL import Image, ImageDraw, ImageFont
-from PIL.ImageDraw import ImageDraw as TImageDraw
 import logging
 from typing import Tuple
+
+from PIL import Image, ImageDraw, ImageFont
+from PIL.ImageDraw import ImageDraw as TImageDraw
+
+import lib.epd7in5b_V2 as eInk
 
 logger = logging.getLogger('app')
 

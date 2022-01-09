@@ -4,3 +4,6 @@ bcm2835-1.60/*
 *__pycache__/*
 EXPORT-black.bmp
 EXPORT-red.bmp
+*.pyc
+*.cache/*
+settings.py

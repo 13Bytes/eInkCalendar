@@ -3,12 +3,13 @@ import calendar
 import locale
 import logging
 import os
+import random
 import sys
 import time
 from datetime import datetime
 
 import schedule
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from PIL.Image import Image as TImage
 from PIL.ImageDraw import ImageDraw as TImageDraw
 
@@ -55,7 +56,8 @@ def main():
         draw_blk = ImageDraw.Draw(image_blk)
         draw_red = ImageDraw.Draw(image_red)
 
-        render_content(draw_blk, draw_red, epd.width, epd.height)
+        render_content(draw_blk, image_blk, draw_red,
+                       image_red, epd.width, epd.height)
         show_content(epd, image_blk, image_red)
 
     except Exception as e:
@@ -66,10 +68,11 @@ def main():
         raise e
 
 
-def render_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, width: int):
+def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDraw, image_red: TImage, height: int, width: int):
     locale.setlocale(locale.LC_ALL, "de_DE")
 
-    PADDING_L = width/10
+    PADDING_L = int(width/10)
+    PADDING_TOP = int(height/100)
     now = time.localtime()
     max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
     day_str = time.strftime("%A")
@@ -93,21 +96,22 @@ def render_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, wid
     current_height += current_font_height
 
     # Month-Overview (with day-string)
-    current_height += height/100
+    current_height += PADDING_TOP
     day_of_month = str(day_number) + "/" + str(max_days_in_month)
     draw_blk.text((PADDING_L, current_height), day_of_month,
                   font=FONT_ROBOTO_P, fill=1)
 
-    tmp_right_aligned = width - get_font_width(FONT_ROBOTO_P, day_str.upper()) - PADDING_L/4
+    tmp_right_aligned = width - \
+        get_font_width(FONT_ROBOTO_P, day_str.upper()) - PADDING_L/4
     draw_blk.text((tmp_right_aligned, current_height), day_str.upper(),
                   font=FONT_ROBOTO_P, fill=1)
 
-    current_height += get_font_height(FONT_ROBOTO_P) + height/100
+    current_height += get_font_height(FONT_ROBOTO_P) + PADDING_TOP
     draw_blk.line((PADDING_L, current_height, width, current_height),
                   fill=1, width=LINE_WIDTH)
 
     # Month-Tally-Overview
-    current_height += height/100
+    current_height += PADDING_TOP
     tally_height = height/40
     tally_padding = width/60
     x_position = PADDING_L + LINE_WIDTH/2
@@ -120,7 +124,6 @@ def render_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, wid
     # Calendar
     current_height += height/40
     event_list = get_events(6)
-    logger.warning(type(event_list))
 
     last_event_day = datetime.now().date()
     for event in event_list:
@@ -149,7 +152,18 @@ def render_content(draw_blk: TImageDraw, draw_red: TImageDraw,  height: int, wid
                       font=FONT_POPPINS_P, fill=1)
         current_height += get_font_height(FONT_POPPINS_P) * 1.1
 
+    # Portal-Icons
+    current_height = int(height*0.73)
+    draw_blk.line((PADDING_L, current_height, width, current_height),
+                  fill=1, width=LINE_WIDTH)
+    current_height += PADDING_TOP
 
+    y = PADDING_L
+
+    for image in get_portal_images(bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1))):
+        image_blk.paste(image, (y, current_height))
+        image_width, _ = image.size
+        y += image_width + PADDING_TOP
 
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):

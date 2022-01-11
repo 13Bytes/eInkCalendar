@@ -9,6 +9,7 @@ def main():
     schedule.every().day.at("00:00").do(displayRun.main)
     schedule.every(12).hours.do(displayRun.main)
 
+    displayRun.main()
     while True:
         schedule.run_pending()
         time.sleep(5)

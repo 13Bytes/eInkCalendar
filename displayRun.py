@@ -18,7 +18,9 @@ from dataHelper import get_events, get_birthdays
 from displayHelpers import *
 from settings import LOCALE
 
-logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
+logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
+                    handlers=[logging.FileHandler(filename="info.log", mode='w'),
+                    logging.StreamHandler()])
 logger = logging.getLogger('app')
 
 CURRENT_DICT = os.path.dirname(os.path.realpath(__file__))
@@ -43,6 +45,7 @@ LINE_WIDTH = 3
 
 
 def main():
+    logger.info(datetime.now())
     try:
         epd = eInk.EPD()
 
@@ -60,6 +63,7 @@ def main():
         render_content(draw_blk, image_blk, draw_red,
                        image_red, epd.width, epd.height)
         show_content(epd, image_blk, image_red)
+        # clear_content(epd)
 
     except Exception as e:
         logger.warning(e)
@@ -176,7 +180,6 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
         draw_red.text((PADDING_L, current_height), bithday_person_string,
                       font=FONT_ROBOTO_P, fill=1)
         current_height += get_font_height(FONT_ROBOTO_P)
-
 
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):

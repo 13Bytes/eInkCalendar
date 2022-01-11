@@ -7,3 +7,4 @@ EXPORT-red.bmp
 *.pyc
 *.cache/*
 settings.py
+info.log

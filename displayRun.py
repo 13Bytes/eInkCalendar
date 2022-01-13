@@ -16,7 +16,7 @@ from PIL.ImageDraw import ImageDraw as TImageDraw
 import lib.epd7in5b_V2 as eInk
 from dataHelper import get_events, get_birthdays
 from displayHelpers import *
-from settings import LOCALE
+from settings import LOCALE, ROTATE_IMAGE
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
                     handlers=[logging.FileHandler(filename="info.log", mode='w'),
@@ -186,6 +186,9 @@ def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
     logger.info("Exporting finial images")
     image_blk.save("EXPORT-black.bmp")
     image_red.save("EXPORT-red.bmp")
+    if ROTATE_IMAGE:
+        image_blk = image_blk.rotate(180)
+        image_red = image_red.rotate(180)
     if not DEBUG:
         init_display(epd)
         logger.info("Writing on display")

@@ -6,3 +6,5 @@ WEBDAV_IS_APPLE = True
 CALDAV_CONTACT_URL = "https://..."
 CALDAV_CONTACT_USER = "username"
 CALDAV_CONTACT_PWD = "passw0rd"
+
+ROTATE_IMAGE = True

@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import requests
 import vobject
-from dateutil.tz import tzutc
+from dateutil import tz
 from icalevents.icalevents import events
 from icalevents.icalparser import Event
 from lxml import etree
@@ -22,11 +22,19 @@ def sort_by_date(e: Event):
 
 def get_events(max_number: int) -> List[Event]:
     logger.info("Retrieving calendar infos")
+    utc_timezone = tz.tzutc()
+    current_timezone = tz.tzlocal()
+
     try:
         event_list = events(WEBDAV_CALENDAR_URL, fix_apple=WEBDAV_IS_APPLE)
         event_list.sort(key=sort_by_date)
         logger.info(
             "Got {} calendar-entries (capped to {})".format(len(event_list), max_number))
+
+        for event in event_list:
+            event.start.replace(tzinfo=utc_timezone)
+            event.start = event.start.astimezone(current_timezone)
+
         return event_list[:max_number]
 
     except Exception as e:

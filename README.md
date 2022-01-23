@@ -59,7 +59,7 @@ This repo includes the software (100% python) and the STLs of the frame.
 
 I used the following hardware:
 
-* [Waveshare 800×480, 7.5inch E-Ink display (13504)](https://www.waveshare.com/product/displays/7.5inch-e-paper-hat.htm)
+* [Waveshare 800×480, 7.5inch E-Ink display (13505)](https://www.waveshare.com/product/displays/7.5inch-e-paper-hat-b.htm)
 * [Raspberry Pi 3b](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)\
 (The Raspi is a bit overkill if you only want to update the calendar. But since it's powered on anyways, I use it to host many other things as well. If you only want to use it for the calendar, you should take a look at the Raspberry Pi Zero series)
 <p align="right">(<a href="#top">back to top</a>)</p>

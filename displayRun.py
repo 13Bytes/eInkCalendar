@@ -118,12 +118,15 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
     # Month-Tally-Overview
     current_height += PADDING_TOP
     tally_height = height/40
-    tally_padding = width/60
+    tally_width = LINE_WIDTH + width/120  # width + padding
+    available_width = width - PADDING_L
+    tally_number = int(available_width / tally_width *
+                       (day_number / max_days_in_month))
     x_position = PADDING_L + LINE_WIDTH/2
-    for i in range(0, day_number):
+    for i in range(0, tally_number):
         draw_blk.line((x_position, current_height, x_position,
                       current_height + tally_height), fill=1, width=LINE_WIDTH)
-        x_position += tally_padding
+        x_position += tally_width
     current_height += tally_height
 
     # Calendar

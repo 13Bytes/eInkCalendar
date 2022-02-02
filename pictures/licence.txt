@@ -1,0 +1,1 @@
+The base-images of the chamber-icons (Chamber_icon*.gif) and the aperture-logo are extracted from the game Portal 2. The copyright for it is held by Valve Corporation, who created the software.

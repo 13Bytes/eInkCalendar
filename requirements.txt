@@ -2,3 +2,4 @@ icalevents
 numpy
 vobject
 lxml
+schedule

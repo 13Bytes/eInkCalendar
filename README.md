@@ -188,6 +188,6 @@ Louis - [@Louis_D_](https://twitter.com/Louis_D_) - coding@13bytes.de
 ## Acknowledgments
 
 * I got the idea from following [reddit-post](https://www.reddit.com/r/RASPBERRY_PI_PROJECTS/comments/qujt3i/wip_portal_desktop_calendar/).
-* This readme-page usese this [template](https://github.com/othneildrew/Best-README-Template).
+* This readme-page uses this [template](https://github.com/othneildrew/Best-README-Template).
 
 <p align="right">(<a href="#top">back to top</a>)</p>

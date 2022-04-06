@@ -8,3 +8,4 @@ EXPORT-red.bmp
 *.cache/*
 settings.py
 info.log
+eInk_env/*

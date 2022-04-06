@@ -3,3 +3,4 @@ numpy
 vobject
 lxml
 schedule
+Pillow

@@ -4,3 +4,4 @@ vobject
 lxml
 schedule
 Pillow
+requests

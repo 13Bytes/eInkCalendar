@@ -108,7 +108,7 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
    ```sh
    sudo apt-get update
    # requirements by waveshare
-   sudo apt-get install python3-pip python3-pil python3-numpy RPi.GPIO spidev
+   sudo apt-get install python3-pip python3-pil python3-numpy RPi.GPIO python-spidev
    # requirements by this repo
    sudo python3 -m pip install -r requirements.txt
    ```
@@ -118,7 +118,7 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
    ```
    Now edit `settings.py` and set all your settings:
 
-   `LOCALE: "en_US"` Select your desired format and language. It needs to be installed on your device. (In 95% of cases it already is - as it's you system-langauge. If not, take a look at the [Debian Wiki](https://wiki.debian.org/Locale))
+   `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. It needs to be installed on your device (which 95% of time is already the case - as it's you system-language. If not, take a look at the [Debian Wiki](https://wiki.debian.org/Locale))
    
    `WEBDAV_CALENDAR_URL = "webcal://p32-caldav.icloud.com/published/2/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"` The address of your shared wabdav calendar. (It needs to be publicly accessible by this URL)
    
@@ -133,18 +133,18 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
 
 
 4. Add the start-script to your boot-process:\
-   (You might need to adapt the path `/home/pi/ePaper/run_calendar.sh` acordingly)
+   (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)
 
    Make `run_calendar.sh` executable
    ```sh
-   chmod +x /home/pi/ePaper/run_calendar.sh
+   chmod +x /home/pi/eInkCalendar/run_calendar.sh
    ``` 
    and add it to crontab, as follows:
    ```sh
    crontab -e
    ```
    and add following line:\
-   ```@reboot sleep 60 && /home/pi/ePaper/run_calendar.sh```\
+   ```@reboot sleep 60 && /home/pi/eInkCalendar/run_calendar.sh```\
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

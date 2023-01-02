@@ -118,7 +118,10 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
    ```
    Now edit `settings.py` and set all your settings:
 
-   `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. It needs to be installed on your device (which 95% of time is already the case - as it's you system-language. If not, take a look at the [Debian Wiki](https://wiki.debian.org/Locale))
+   `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. 
+   It needs to be installed on your device (which 95% of time is already the case - as it's you system-language. 
+   You can list all installed local-packages with `locale -a`.
+   If the desired one is missing, add it in this menu `sudo dpkg-reconfigure locales` (for Raspberry Pis) or take a look at the general [Debian Wiki](https://wiki.debian.org/Locale)). 
    
    `WEBDAV_CALENDAR_URL = "webcal://p32-caldav.icloud.com/published/2/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"` The address of your shared wabdav calendar. (It needs to be publicly accessible by this URL)
    
@@ -144,7 +147,7 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
    crontab -e
    ```
    and add following line:\
-   ```@reboot sleep 60 && /home/pi/eInkCalendar/run_calendar.sh```\
+   ```@reboot sleep 60 && /home/pi/eInkCalendar/run_calendar.sh```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

@@ -55,6 +55,10 @@ def convert_image_to_screen(image: TImage) -> TImage:
 
     image_array = np.array(image)
     converted_image_array = vfunc(image_array)
+    
+    # Cast the result to uint8 (Image only supports uint8 and this is int64)
+    converted_image_array = converted_image_array.astype(np.uint8)
+    
     return Image.fromarray(converted_image_array)
 
 

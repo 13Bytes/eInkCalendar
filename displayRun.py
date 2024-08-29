@@ -186,7 +186,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
 
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
-    logger.info("Exporting finial images")
+    logger.info("Exporting final images")
     image_blk.save("EXPORT-black.bmp")
     image_red.save("EXPORT-red.bmp")
     if ROTATE_IMAGE:

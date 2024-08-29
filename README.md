@@ -97,6 +97,11 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   sudo dpkg -i wiringpi-latest.deb
   ```
 
+* Install the locales
+```sh
+sudo dpkg-reconfigure locales
+```
+Make sure that later in settings the locale is one of the selected here (and include the .utf8 if is in the name).
 ### Installation
 
 1. Clone the repo

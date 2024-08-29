@@ -30,18 +30,18 @@ def set_sleep(epd: eInk.EPD):
 
 
 def draw_text_centered(text: str, point: Tuple[float, float], canvas: TImageDraw, text_font: ImageFont.FreeTypeFont):
-    text_width, _ = text_font.getsize(text)
+    _ ,_, text_width, _ = text_font.getbbox(text)
     canvas.text((point[0] - text_width/2, point[1]),
                 text, font=text_font, fill=0)
 
 
 def get_font_height(font: ImageFont.FreeTypeFont):
-    _, text_height = font.getsize("A")
+    _, _, _, text_height = font.getbbox("A")
     return text_height
 
 
 def get_font_width(font: ImageFont.FreeTypeFont, text: str):
-    text_width, _ = font.getsize(text)
+    _, _, text_width, _ = font.getbbox(text)
     return text_width
 
 

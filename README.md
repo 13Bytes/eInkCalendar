@@ -110,7 +110,10 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
    # requirements by waveshare
    sudo apt-get install python3-pip python3-pil python3-numpy RPi.GPIO python3-spidev
    # requirements by this repo
-   sudo python3 -m pip install -r requirements.txt
+   python3 -m venv venv
+   source venv/bin/activate
+   python3 -m pip install -r requirements.txt
+   #old: sudo python3 -m pip install -r requirements.txt
    ```
 3. Create config-file
    ```sh

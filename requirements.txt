@@ -5,3 +5,8 @@ lxml
 schedule
 Pillow
 requests
+pigpio
+RPi.GPIO
+lgpio
+gpiozero
+spidev

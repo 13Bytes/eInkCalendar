@@ -79,9 +79,9 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   ```
 * Install BCM2835 libraries
   ```sh
-  wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.60.tar.gz
-  tar zxvf bcm2835-1.60.tar.gz 
-  cd bcm2835-1.60/
+  wget http://www.airspayce.com/mikem/bcm2835/bcm2835-1.75.tar.gz
+  tar zxvf bcm2835-1.75.tar.gz 
+  cd bcm2835-1.75/
   sudo ./configure
   sudo make
   sudo make check

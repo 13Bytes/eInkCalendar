@@ -87,6 +87,8 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
     max_days_in_month = calendar.monthrange(now.tm_year, now.tm_mon)[1]
     day_str = time.strftime("%A")
     day_number = now.tm_mday
+    wday_number = now.tm_wday
+    is_weekend = wday_number >= 5
     month_str = time.strftime("%B")
 
     # draw_text_centered(str(day_number), (width/2, 0), draw_blk, FONT_ROBOTO_H1)
@@ -101,8 +103,15 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
 
     # Date
     current_font_height = get_font_height(FONT_ROBOTO_DATE)
-    draw_blk.text((PADDING_L, current_height - current_font_height/10),
-                  str(day_number), font=FONT_ROBOTO_DATE, fill=1)
+    
+    #Write weekends days in red
+    if is_weekend:
+        draw_red.text((PADDING_L, current_height - current_font_height/10),
+                      str(day_number), font=FONT_ROBOTO_DATE, fill=1)
+    else:
+        draw_blk.text((PADDING_L, current_height - current_font_height/10),
+                      str(day_number), font=FONT_ROBOTO_DATE, fill=1)
+                      
     current_height += current_font_height
 
     # Month-Overview (with day-string)

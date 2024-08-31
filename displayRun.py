@@ -27,8 +27,13 @@ CURRENT_DICT = os.path.dirname(os.path.realpath(__file__))
 PICTURE_DICT = os.path.join(CURRENT_DICT, 'pictures')
 FONT_DICT = os.path.join(CURRENT_DICT, 'fonts')
 
-DEBUG = False
 
+#Define debug if it was not already defined in settings.py
+try:
+    DEBUG
+except NameError:
+    DEBUG = False
+    
 FONT_ROBOTO_DATE = ImageFont.truetype(
     os.path.join(FONT_DICT, 'Roboto-Black.ttf'), 200)
 FONT_ROBOTO_H1 = ImageFont.truetype(
@@ -156,7 +161,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
                           font=FONT_POPPINS_P, fill=1)
 
         summmary_padding = 60
-        draw_blk.text((PADDING_L + summmary_padding, current_height), event.summary,
+        draw_blk.text((PADDING_L + summmary_padding, current_height), event.summary + " - " + event.calendar_name,
                       font=FONT_POPPINS_P, fill=1)
         current_height += get_font_height(FONT_POPPINS_P) * 1.1
 

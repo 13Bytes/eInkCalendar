@@ -27,7 +27,22 @@ def get_events(max_number: int) -> List[Event]:
     current_timezone = tz.tzlocal()
 
     try:
-        event_list = events(WEBDAV_CALENDAR_URL, fix_apple=WEBDAV_IS_APPLE)
+        
+        #Will store all the events
+        event_list = []
+        
+        #Get all the events of the provided calendars
+        for calendar_settings in WEBDAV_CALENDAR_URLS:
+            calendar_events_list = events(calendar_settings["url"], fix_apple=calendar_settings["is_apple"])
+            for event in calendar_events_list:
+                #Add a property called "calendar_name" to the event with the calendar name
+                #Will be used to identify the owner of the event  
+                setattr(event, "calendar_name", calendar_settings["calendar_name"])
+            
+            #Add the new events to the list
+            event_list = event_list + calendar_events_list
+                
+        #Sort the list by date
         event_list.sort(key=sort_by_date)
 
         start_count = 0

@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 from typing import List, Tuple
 
 import numpy as np
@@ -93,3 +94,56 @@ def get_portal_images(cake=False, flying=False, pellet_hazard=False, bridge=Fals
     image_list.append(load_picture(
         image_light_bridge_names[bool_to_array_index(bridge)]))
     return image_list
+
+def draw_black_red_white_text(draw_black, draw_red, text, position, font, black_density, red_density=0.0, white_density=0.0):
+    """
+    Draw text with epaper black/red color text on a black-and-white image context by controlling the density of black pixels using the existing draw contexts for black and red.
+    
+    :param draw_black: ImageDraw.Draw object for the image
+    :param draw_red: ImageDraw.Draw object for the image
+    :param text: Text to be written
+    :param position: Tuple (x, y) for text position
+    :param font: Font to use
+    :param black_density: Fraction of black pixels in the text. It will be normalized to a total of 1 with the other two colors.
+    :param red_density: Fraction of red pixels in the text. It will be normalized to a total of 1 with the other two colors.
+    :param white_density: Fraction of white pixels in the text. It will be normalized to a total of 1 with the other two colors.
+
+    """
+    #Normalize color values
+    total_density = black_density + red_density + white_density
+    
+    black_density = black_density/total_density
+    red_density = red_density/total_density
+    white_density = white_density/total_density
+
+    # Calculate text size
+    _, _, text_width, text_height = font.getbbox(text)
+
+    x, y = position
+    
+    # Generate an image with the text
+    # Create a blank image for the text
+    text_image = Image.new('L', (text_width, text_height), 255)  # White background
+    #Generate the context for writing the text
+    text_draw = ImageDraw.Draw(text_image)
+    ##Write the text
+    text_draw.text((0, 0), text, font=font, fill=1) 
+
+    # Convert the text image to a NumPy array for manipulation
+    text_array = np.array(text_image)
+
+    # Iterate over the array and test each point. If pass will write a point to the main context
+    for j in range(text_height):
+        for i in range(text_width):
+            if text_array[j, i] == 1:  # If the pixel is part of the text
+                #The test is for the color density of the letters.
+                #A random number is generated and if is above the threshold no point will be written
+                random_value = random.random()
+                if random_value < black_density:
+                    # Draw a black point if the random value is below the black density 
+                    draw_black.point((x + i, y + j), fill=1)
+                elif random_value < red_density + black_density:
+                    #draw a red point if the value is between the black density and its sum wih the red one
+                    draw_red.point((x + i, y + j), fill=1)
+                    #Otherwise will stay white
+

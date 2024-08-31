@@ -156,8 +156,12 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
             # day_string = "{} {}".format(last_event_day.day,
             #                               last_event_day.strftime("%a"))
             day_string = last_event_day.strftime("%a %d")
-            draw_blk.text((PADDING_L, current_height), day_string,
-                          font=FONT_ROBOTO_P, fill=1)
+            
+            ##Halftoned day text
+            draw_black_red_white_text(draw_blk, draw_red, text=day_string, position=(PADDING_L, current_height), font=FONT_ROBOTO_P, black_density=0.0, red_density=0.8, white_density=0.2)
+
+
+            #draw_blk.text((PADDING_L, current_height), day_string, font=FONT_ROBOTO_P, fill=1)
             current_height += get_font_height(FONT_ROBOTO_P)
 
         # Draw event

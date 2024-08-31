@@ -120,26 +120,44 @@ Make sure that later in settings the locale is one of the selected here (and inc
    python3 -m pip install -r requirements.txt
    #old: sudo python3 -m pip install -r requirements.txt
    ```
-3. Create config-file
+3. Create a config-file
    ```sh
    cp settings.py.sample settings.py
    ```
    Now edit `settings.py` and set all your settings:
 
-   `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. 
+- `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. 
    It needs to be installed on your device (which 95% of time is already the case - as it's you system-language. 
    You can list all installed local-packages with `locale -a`.
    If the desired one is missing, add it in this menu `sudo dpkg-reconfigure locales` (for Raspberry Pis) or take a look at the general [Debian Wiki](https://wiki.debian.org/Locale)). 
    
-   `WEBDAV_CALENDAR_URL = "webcal://p32-caldav.icloud.com/published/2/XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"` The address of your shared wabdav calendar. (It needs to be publicly accessible by this URL)
+
+- `WEBDAV_CALENDAR_URLS The calendars to be displayed:
+   ```python
+    WEBDAV_CALENDAR_URLS = [
+ 	{
+ 	"url": "webcal://...",
+ 	"calendar_name": "a name",
+ 	"is_apple": True
+ 	},
+ 	{
+ 	"url": "webcal://...2",
+ 	"calendar_name": "a name2",
+ 	"is_apple": True
+ 	},
+     ]
+    ```
+
+   Is a list of dicts where the keys are:
+	- `URL` is the URL for the calendar (should be public)
+	- `calendar_name` is the name for displaying the calendar on the screen and
+	- `is_apple` is to indicate that Apple iCal is the provider of the url (solves some issues).
+
+- `CALDAV_CONTACT_USER = "louis"` Username for logging into your CALDAV contact-list.
    
-   `WEBDAV_IS_APPLE = True` Is the calendar hosted on icloud?
+- `CALDAV_CONTACT_PWD = "secret"` Password for logging into your CALDAV contact-list.
    
-   `CALDAV_CONTACT_USER = "louis"` Username for logging into your CALDAV contact-list.
-   
-   `CALDAV_CONTACT_PWD = "secret"` Password for logging into your CALDAV contact-list.
-   
-   `ROTATE_IMAGE = True` This will rotate the image 180° before printing it to the calendar. `True` is required if you use my STL, as the dipay is mounted upside-down.
+- `ROTATE_IMAGE = True` This will rotate the image 180° before printing it to the calendar. `True` is required if you use my STL, as the dipay is mounted upside-down.
 
 
 

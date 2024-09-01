@@ -59,11 +59,8 @@ def main():
 
         #Use aperture image only if the user wants, otherwize use an image without the logo
         image_blk = Image.open(os.path.join(
-<<<<<<< HEAD
-            PICTURE_DICT, "blank-hk.bmp" if APERTURE_DECORATIONS else "blank-aperture.bmp"))
-=======
             PICTURE_DICT, "blank-aperture.bmp" if APERTURE_DECORATIONS else "blank-hk.bmp"))
->>>>>>> 6effb5b (Makes the aperture logo and images optional)
+
         image_red = Image.open(os.path.join(
             PICTURE_DICT, "blank-hk.bmp"))
 
@@ -166,12 +163,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
             day_string = last_event_day.strftime("%a %d")
             
             ##Halftoned day text
-<<<<<<< HEAD
-            draw_black_red_white_text(draw_blk, draw_red, text=day_string, position=(PADDING_L, current_height), font=FONT_ROBOTO_P, black_density=0.2, red_density=0.8, white_density=0.2)
-=======
             draw_black_red_white_text(draw_blk, draw_red, text=day_string, position=(PADDING_L, current_height), font=FONT_ROBOTO_P, black_density=0.2, red_density=0.8, white_density=0.0)
->>>>>>> 6effb5b (Makes the aperture logo and images optional)
-
 
             #draw_blk.text((PADDING_L, current_height), day_string, font=FONT_ROBOTO_P, fill=1)
             current_height += get_font_height(FONT_ROBOTO_P)

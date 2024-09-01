@@ -16,7 +16,7 @@ from PIL.ImageDraw import ImageDraw as TImageDraw
 import lib.epd7in5b_V2 as eInk
 from dataHelper import get_events, get_birthdays
 from displayHelpers import *
-from settings import LOCALE, ROTATE_IMAGE
+from settings import LOCALE, ROTATE_IMAGE, APERTURE_DECORATIONS, SHOW_QUOTES
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
                     handlers=[logging.FileHandler(filename="info.log", mode='w'),
@@ -57,8 +57,9 @@ def main():
         if DEBUG:
             logger.info("DEBUG-Mode activated...")
 
+        #Use aperture image only if the user wants, otherwize use an image without the logo
         image_blk = Image.open(os.path.join(
-            PICTURE_DICT, "blank-aperture.bmp"))
+            PICTURE_DICT, "blank-hk.bmp" if APERTURE_DECORATIONS else "blank-aperture.bmp"))
         image_red = Image.open(os.path.join(
             PICTURE_DICT, "blank-hk.bmp"))
 
@@ -93,8 +94,11 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
 
     # draw_text_centered(str(day_number), (width/2, 0), draw_blk, FONT_ROBOTO_H1)
 
+    
+    vertical_margin = height/20
     # Heading
-    current_height = height/20
+    current_height = vertical_margin
+    
     draw_blk.line((PADDING_L, current_height, width, current_height),
                   fill=1, width=LINE_WIDTH)
     draw_blk.text((PADDING_L, current_height), month_str.upper(),
@@ -158,7 +162,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
             day_string = last_event_day.strftime("%a %d")
             
             ##Halftoned day text
-            draw_black_red_white_text(draw_blk, draw_red, text=day_string, position=(PADDING_L, current_height), font=FONT_ROBOTO_P, black_density=0.0, red_density=0.8, white_density=0.2)
+            draw_black_red_white_text(draw_blk, draw_red, text=day_string, position=(PADDING_L, current_height), font=FONT_ROBOTO_P, black_density=0.2, red_density=0.8, white_density=0.2)
 
 
             #draw_blk.text((PADDING_L, current_height), day_string, font=FONT_ROBOTO_P, fill=1)
@@ -178,30 +182,35 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,  draw_red: TImageDra
                       font=FONT_POPPINS_P, fill=1)
         current_height += get_font_height(FONT_POPPINS_P) * 1.1
 
-    # Portal-Icons
-    current_height = int(height*0.73)
+    #If the aperture science is hidden this line will be at the bottom
+    current_height = int(height*0.73 if APERTURE_DECORATIONS else height-vertical_margin)
     draw_blk.line((PADDING_L, current_height, width, current_height),
                   fill=1, width=LINE_WIDTH)
     current_height += PADDING_TOP
 
-    y = PADDING_L
-    bithday_persons = get_birthdays()
-    draw_cake = (len(bithday_persons) > 0)
-    max_image_height = 0
-    for image in get_portal_images(draw_cake, bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1))):
-        image_blk.paste(image, (y, current_height))
-        image_width, image_height = image.size
-        y += image_width + PADDING_TOP
-        max_image_height = image_height if (
-            image_height > max_image_height) else max_image_height
-    current_height += max_image_height + PADDING_TOP
-    # Draw name of birthday-person
-    if draw_cake:
-        bithday_person_string = ", ".join(bithday_persons)
-        draw_red.text((PADDING_L, current_height), bithday_person_string,
-                      font=FONT_ROBOTO_P, fill=1)
-        current_height += get_font_height(FONT_ROBOTO_P)
-
+    #Only show Aperture Images if the user wants 
+    if APERTURE_DECORATIONS:
+        # Portal-Icons
+        y = PADDING_L
+        bithday_persons = get_birthdays()
+        draw_cake = (len(bithday_persons) > 0)
+        max_image_height = 0
+        for image in get_portal_images(draw_cake, bool(random.getrandbits(1)), bool(random.getrandbits(1)), bool(random.getrandbits(1))):
+            image_blk.paste(image, (y, current_height))
+            image_width, image_height = image.size
+            y += image_width + PADDING_TOP
+            max_image_height = image_height if (
+                image_height > max_image_height) else max_image_height
+        
+        current_height += max_image_height + PADDING_TOP
+        
+        # Draw name of birthday-person
+        if draw_cake:
+            bithday_person_string = ", ".join(bithday_persons)
+            draw_red.text((PADDING_L, current_height), bithday_person_string,
+                          font=FONT_ROBOTO_P, fill=1)
+            current_height += get_font_height(FONT_ROBOTO_P)
+    
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
     logger.info("Exporting final images")

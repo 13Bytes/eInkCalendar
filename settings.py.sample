@@ -19,5 +19,11 @@ CALDAV_CONTACT_PWD = "passw0rd"
 
 ROTATE_IMAGE = True
 
+#Aperture Science Decorations
+APERTURE_DECORATIONS = True
+
+#Quotes
+SHOW_QUOTES = True
+
 #Debug mode. It will write to disk the image and not to the screen.
 DEBUG = False

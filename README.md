@@ -157,8 +157,11 @@ Make sure that later in settings the locale is one of the selected here (and inc
    
 - `CALDAV_CONTACT_PWD = "secret"` Password for logging into your CALDAV contact-list.
    
-- `ROTATE_IMAGE = True` This will rotate the image 180° before printing it to the calendar. `True` is required if you use my STL, as the dipay is mounted upside-down.
+- `APERTURE_DECORATIONS = True` Will show the aperture science decorations and logo. If false will hide them (and gain some space).
 
+- `SHOW_QUOTES = True` Will show a random quote from [quotable.io](https://api.quotable.io).
+
+- `ROTATE_IMAGE = True` This will rotate the image 180° before printing it to the calendar. `True` is required if you use my STL, as the dipay is mounted upside-down.
 
 
 4. Add the start-script to your boot-process:\

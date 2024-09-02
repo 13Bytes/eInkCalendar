@@ -48,7 +48,7 @@ def get_events(max_number: int) -> List[Event]:
                 setattr(event, "calendar_name", calendar_settings["calendar_name"])
             
             #Filter out the events that are before the current time (icalevents only filter by day and not hour and minute)
-            calendar_events_list = [event for event in calendar_events_list if event.start.astimezone(timezone.utc) >= current_UTC_date]
+            calendar_events_list = [event for event in calendar_events_list if event.end.astimezone(timezone.utc) >= current_UTC_date]
             #Add the new events to the list
             event_list = event_list + calendar_events_list
                 

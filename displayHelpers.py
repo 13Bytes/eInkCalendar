@@ -37,13 +37,13 @@ def draw_text_centered(text: str, point: Tuple[float, float], canvas: TImageDraw
 
 
 def get_font_height(font: ImageFont.FreeTypeFont):
-    _, _, _, text_height = font.getbbox("A")
-    return text_height
+    _, _, _, bottom = font.getbbox("A")
+    return bottom
 
 
 def get_font_width(font: ImageFont.FreeTypeFont, text: str):
-    _, _, text_width, _ = font.getbbox(text)
-    return text_width
+    _, _, right, _ = font.getbbox(text)
+    return right
 
 
 def convert_image_to_screen(image: TImage) -> TImage:

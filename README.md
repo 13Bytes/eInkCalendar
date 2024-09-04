@@ -127,10 +127,10 @@ Make sure that later in settings the locale is one of the selected here (and inc
    Now edit `settings.py` and set all your settings:
 
 - `LOCALE: "en_US"` (or e.g. `en-GB.UTF-8`) Select your desired format and language. 
-   It needs to be installed on your device (which 95% of time is already the case - as it's you system-language. 
+   It needs to be installed on your device (which 95% of time is already the case - as it's you system-language). 
    You can list all installed local-packages with `locale -a`.
    If the desired one is missing, add it in this menu `sudo dpkg-reconfigure locales` (for Raspberry Pis) or take a look at the general [Debian Wiki](https://wiki.debian.org/Locale)). 
-   
+   Used for generate the text for the interface but also for selecting the holidays.
 
 - `WEBDAV_CALENDAR_URLS The calendars to be displayed:
    ```python
@@ -163,6 +163,7 @@ Make sure that later in settings the locale is one of the selected here (and inc
 
 - `ROTATE_IMAGE = True` This will rotate the image 180° before printing it to the calendar. `True` is required if you use my STL, as the dipay is mounted upside-down.
 
+- `FIRST_WEEKDAY_IS_SUNDAY = True` Will start the week in sunday on the calendar if true. Otherwise it will be Monday.
 
 4. Add the start-script to your boot-process:\
    (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)

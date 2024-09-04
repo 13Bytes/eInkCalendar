@@ -22,7 +22,10 @@ ROTATE_IMAGE = True
 #Aperture Science Decorations
 APERTURE_DECORATIONS = True
 
-#Quotes
+#True if the first day of the week is sunday. False to be Monday
+FIRST_WEEKDAY_IS_SUNDAY = True
+
+#Will show a random quotes on the bottom of the screen 
 SHOW_QUOTES = True
 
 #Debug mode. It will write to disk the image and not to the screen.

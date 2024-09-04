@@ -9,7 +9,11 @@ import time
 from datetime import datetime
 import calendar
 
+from holidays import country_holidays
+
 import schedule
+
+import re
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from PIL.Image import Image as TImage
@@ -49,18 +53,20 @@ FONT_ROBOTO_P = ImageFont.truetype(
 #The calendar will occupy the same height of the Title Date font, and will have 7 rows.
 #So the size of the font should be at maximum 7 times less (the calendar has 7 rows.)
 #To make sure that there's some space between rows, for the ascenders and descenders and for the size between columns it be half of that.
-calendar_number_font_size = int(round(title_date_font_size/(7*1.90)))
-print("font size:"+str(calendar_number_font_size))
-print("1.90font size:"+str(int(round(title_date_font_size/(7*1.90)))))
+calendar_number_font_size = int(round(title_date_font_size/(7*2)))
 
 CALENDAR_NUMBER_FONT = ImageFont.truetype(
-	os.path.join(FONT_DICT, 'DejaVuSansCondensed.ttf'), calendar_number_font_size)
+	os.path.join(FONT_DICT, 'DejaVuSansMono.ttf'), calendar_number_font_size)
+	
+CALENDAR_NUMBER_TODAY_FONT = ImageFont.truetype(
+	os.path.join(FONT_DICT, 'DejaVuSansMono-Bold.ttf'), calendar_number_font_size)
+	
 #Font for the days numbers of the other months
 CALENDAR_NUMBER_SECONDARY_FONT = ImageFont.truetype(
-	os.path.join(FONT_DICT, 'DejaVuSansCondensed.ttf'), int(round(calendar_number_font_size/4*3)))
+	os.path.join(FONT_DICT, 'DejaVuSansMono.ttf'), int(round(calendar_number_font_size/4*3)))
 #Font for the calendar header
 CALENDAR_HEADER_FONT = ImageFont.truetype(
-	os.path.join(FONT_DICT, 'DejaVuSansCondensed-Bold.ttf'), calendar_number_font_size)
+	os.path.join(FONT_DICT, 'DejaVuSansMono-Bold.ttf'), calendar_number_font_size)
 		
 		
 EVENT_TIME_FONT = ImageFont.truetype(
@@ -107,11 +113,13 @@ def main():
 
 
 def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDraw, image_red: TImage, height: int, width: int):
+
 	locale.setlocale(locale.LC_ALL, LOCALE)
+	
 
 	#Makes sure that antialiasing is disabled in font rendering
-	draw_blk.fontmode = "L"
-	draw_red.fontmode = "L"
+	draw_blk.fontmode = "1"
+	draw_red.fontmode = "1"
 
 	PADDING_L = int(width/10)
 	PADDING_R = PADDING_L/4
@@ -127,6 +135,18 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	is_weekend = wday_number >= 5
 	month_str = time.strftime("%B")
 
+	#Get the country code from the locale
+	try:
+		country_code = re.split(r'[_\.]', LOCALE)[1]
+	except:
+		country_code = ""
+	#Get the holidays
+	locale_holidays = country_holidays(country_code, years = year_number)
+	
+	date_now = datetime(year_number, month_number, day_number).date()
+	#Test if today is a holiday
+	is_holiday = date_now in locale_holidays
+	
 	# draw_text_centered(str(day_number), (width/2, 0), draw_blk, FONT_ROBOTO_H1)
 
 	
@@ -145,7 +165,9 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	
 	#Write weekends days in red
 	title_date_origin_y = current_height - current_font_height/10
-	if is_weekend:
+	
+	
+	if is_weekend or is_holiday:
 		draw_red.text((PADDING_L, title_date_origin_y),
 					  str(day_number), font=TITLE_DATE, fill=1)
 	else:
@@ -182,6 +204,10 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	
 	line_height_max = (line_test_bottom_y-line_test_top_y)/7
 	
+	#Radius for the circle of the today day. The radius will be half the row or column size, whatever the lesser. 
+	#Will be a bit bigger if the number has two digits (bigger so to evolve better the number but more little so it doesnt go abve the header if in the first row)
+	today_circle_radius = min(line_height_max, day_width) / 2 + (1 if day_number >= 10 else 0)
+	
 	#The text should be aligned by the font baseline. However it sould appear centered on the screen below the upperedge of the current day number on the right
 	#This will aloow the text to be lowered.
 	#line_row_baseline_adjustment = get_font_height(CALENDAR_HEADER_FONT)/2
@@ -201,21 +227,70 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		#The row heigh will be half way between rows
 		row_height = int(round(line_test_top_y+(row_number-0.5)*line_height_max))
 	
-		#Header
+		# In the first row draws the header with the week days name
 		if row_number == 1:
-			for index, day_name in enumerate([calendar.day_abbr[day_number] for day_number in month_calendar.iterweekdays()]):
-				draw_blk.text((line_test_leading_x+index*day_width+day_width_padding, row_height),
-							  day_name[0].upper(), font=CALENDAR_HEADER_FONT, anchor="mm", fill=1)		
+			for index, header_day_number in enumerate(month_calendar.iterweekdays()):
+			
+				#Day name first letter in caps
+				day_name = calendar.day_abbr[header_day_number]
+				day_name_header = day_name[0].upper()
+				day_name_coordinate = (line_test_leading_x+index*day_width+day_width_padding, row_height)
+				
+				#Coordinates for the rectangle/background color
+				header_x_leading = line_test_leading_x+index*day_width
+				header_y_top = row_height - line_height_max/2
+				
+				header_x_trailing = line_test_leading_x+index*day_width+day_width
+				header_y_bottom = row_height + line_height_max/2
+				
+				#Will draw the rectangle in red if in a weekend. Otherwise in black
+				if header_day_number >= 5:
+					draw_red.rectangle([(header_x_leading, header_y_top), (header_x_trailing, header_y_bottom)], fill=1)
+					
+					#Draw the first letter of the weekday in the background color	
+					draw_red.text(day_name_coordinate, day_name_header, font=CALENDAR_HEADER_FONT, anchor="mm", fill=0)	
+							  
+				else:
+					draw_blk.rectangle([(header_x_leading, header_y_top), (header_x_trailing, header_y_bottom)], fill=1)
+					
+					#Draw the first letter of the weekday in the background color	
+					draw_blk.text(day_name_coordinate, day_name_header, font=CALENDAR_HEADER_FONT, anchor="mm", fill=0)
+							  
+							  		
+							  
 		elif number_of_weeks > row_number-2:
 			#If there is a days on the month to display in this row will retrieve and draw them
 			#Iterate the number columns
 			for day in range(0,7):
 				day_data = days_of_month[row_number-2][day]
 				cal_day_number = day_data.day
+				cal_day_number_string = str(cal_day_number).replace("0", "O")
 				cal_month_number = day_data.month
-				cal_font = CALENDAR_NUMBER_FONT if cal_month_number == month_number else CALENDAR_NUMBER_SECONDARY_FONT
-				draw_blk.text((line_test_leading_x+day*day_width+day_width_padding, row_height),
-						  	str(cal_day_number), font=cal_font, anchor="mm", fill=1)
+				#The week day
+				cal_day_weekday = day_data.weekday()
+
+
+				center_day_coord = (line_test_leading_x+day*day_width+day_width_padding, row_height)
+				
+				
+				if cal_day_number == day_number and cal_month_number == month_number:
+					#Draw a circle on the current day. The radius will be half the row or column size, whatever the lesser
+					#Will be red on the weekends or holidays
+					if cal_day_weekday >= 5 or day_data in locale_holidays:
+						draw_red.circle(center_day_coord, today_circle_radius, fill=1)
+						draw_red.text(center_day_coord, cal_day_number_string, font=CALENDAR_NUMBER_TODAY_FONT, anchor="mm", fill=0, features=["-zero"])
+					else:
+						draw_blk.circle(center_day_coord, today_circle_radius, fill=1)
+						draw_blk.text(center_day_coord, cal_day_number_string, font=CALENDAR_NUMBER_TODAY_FONT, anchor="mm", fill=0, features=["-zero"])
+					
+				else:
+					cal_font = CALENDAR_NUMBER_FONT if cal_month_number == month_number else CALENDAR_NUMBER_SECONDARY_FONT
+
+					#If the weekday is saturday or sunday or a holiday will paint it red
+					if cal_day_weekday >= 5 or day_data in locale_holidays:
+						draw_red.text(center_day_coord, cal_day_number_string, font=cal_font, anchor="mm", fill=1, features=["-zero"])
+					else:
+						draw_blk.text(center_day_coord, cal_day_number_string, font=cal_font, anchor="mm", fill=1, features=["-zero"])
 
 	
 	# Month-Overview (with day-string)

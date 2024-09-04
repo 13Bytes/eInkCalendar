@@ -1,4 +1,5 @@
 icalevents
+holidays
 numpy
 vobject
 lxml

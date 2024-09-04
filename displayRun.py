@@ -49,7 +49,10 @@ FONT_ROBOTO_P = ImageFont.truetype(
 #The calendar will occupy the same height of the Title Date font, and will have 7 rows.
 #So the size of the font should be at maximum 7 times less (the calendar has 7 rows.)
 #To make sure that there's some space between rows, for the ascenders and descenders and for the size between columns it be half of that.
-calendar_number_font_size = int(round(title_date_font_size/(7*2)))
+calendar_number_font_size = int(round(title_date_font_size/(7*1.90)))
+print("font size:"+str(calendar_number_font_size))
+print("1.90font size:"+str(int(round(title_date_font_size/(7*1.90)))))
+
 CALENDAR_NUMBER_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSansCondensed.ttf'), calendar_number_font_size)
 #Font for the days numbers of the other months
@@ -107,8 +110,8 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	locale.setlocale(locale.LC_ALL, LOCALE)
 
 	#Makes sure that antialiasing is disabled in font rendering
-	draw_blk.fontmode = "1"
-	draw_red.fontmode = "1"
+	draw_blk.fontmode = "L"
+	draw_red.fontmode = "L"
 
 	PADDING_L = int(width/10)
 	PADDING_R = PADDING_L/4
@@ -173,12 +176,15 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	line_test_top_y = current_height-current_font_height+2*(current_font_height/10)
 	
 	cal_width = line_test_trailing_x-line_test_leading_x
-	day_width = cal_width/7
+	day_width = round(cal_width/7)
 	#A padding to make the letters/numbers be draw on the center, center align
-	day_width_padding = day_width/2
+	day_width_padding = round(day_width/2)
 	
 	line_height_max = (line_test_bottom_y-line_test_top_y)/7
 	
+	#The text should be aligned by the font baseline. However it sould appear centered on the screen below the upperedge of the current day number on the right
+	#This will aloow the text to be lowered.
+	#line_row_baseline_adjustment = get_font_height(CALENDAR_HEADER_FONT)/2
 	
 	#Month Gridlines
 	#Bounds

@@ -444,7 +444,9 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		#Will test if the text fits in the available space. If not wil trim it char by char, appending a ... until it does
 		
 		#Get the available space
-		available_space = width - (PADDING_L + summmary_padding + column_spacing + calendar_names_width[event.calendar_name] + PADDING_R)
+		#If there is only one clanedar he will not be displayed and there will more space
+		calendar_name_space = column_spacing + calendar_names_width[event.calendar_name] if len(calendar_names) > 1 else 0
+		available_space = width - (PADDING_L + summmary_padding + calendar_name_space + PADDING_R)
 		
 		#WiLl store the text to display
 		trimmed_event_summary = event.summary
@@ -465,10 +467,11 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		draw_blk.text((PADDING_L + summmary_padding, current_height), trimmed_event_summary,
 					  font=EVENT_NAME_FONT, anchor="ls", fill=1)			  
 		
-
+		if len(calendar_names) > 1:
 		#Calendar Name (padded to the right and using a fitted name defined above to make sure that won't occupies more space that available, as defined by max_calendar_name_width)
-		draw_blk.text((PADDING_R_COORDINATE, current_height), calendar_names_fitted[event.calendar_name],
-					  font=EVENT_CALENDAR_FONT, anchor="rs", fill=1)   
+		#Will only be shown if there is more than one calendar
+			draw_blk.text((PADDING_R_COORDINATE, current_height), calendar_names_fitted[event.calendar_name],
+					  	font=EVENT_CALENDAR_FONT, anchor="rs", fill=1)   
 
 		#Next line location
 		current_height += line_height

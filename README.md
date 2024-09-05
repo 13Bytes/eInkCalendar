@@ -148,10 +148,12 @@ Make sure that later in settings the locale is one of the selected here (and inc
      ]
     ```
 
-   Is a list of dicts where the keys are:
+   Is a list of dicts, at least one must be filled, where the keys are:
 	- `URL` is the URL for the calendar (should be public)
 	- `calendar_name` is the name for displaying the calendar on the screen and
 	- `is_apple` is to indicate that Apple iCal is the provider of the url (solves some issues).
+   
+   
 
 - `CALDAV_CONTACT_USER = "louis"` Username for logging into your CALDAV contact-list.
    

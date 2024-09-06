@@ -167,6 +167,13 @@ Make sure that later in settings the locale is one of the selected here (and inc
 
 - `FIRST_WEEKDAY_IS_SUNDAY = True` Will start the week in sunday on the calendar if true. Otherwise it will be Monday.
 
+- `TOMORROWIO_API_KEY = "[insert api key here]" For accessing the weather please go to (tomorrow.io)[https://tomorrow.io/] register for a free account and insert the key here. When empty or commented will make not show the weather.
+
+- `WEATHER_LOCATION = "Hamburg DE"` Location for weather forecast. Empty or commented so to not showing the weather. Can use the country after the city but without commas. Also latitude and longitude. Se reference on [tomorrow.io api](https://docs.tomorrow.io/reference/weather-forecast)
+
+- `TEMPERATURE_UNIT = "C" ` Temperature Units (can be C for Celsius or F for Fahrenheit)
+
+`
 4. Add the start-script to your boot-process:\
    (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)
 

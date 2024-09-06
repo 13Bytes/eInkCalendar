@@ -15,14 +15,20 @@ import schedule
 
 import re
 
+import requests
+
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 from PIL.Image import Image as TImage
 from PIL.ImageDraw import ImageDraw as TImageDraw
 
 import lib.epd7in5b_V2 as eInk
 from dataHelper import get_events, get_birthdays
+
 from displayHelpers import *
 from settings import *
+
+#Get the conversion from the weather codes to emoji symbols
+from weatherCodesEmoji import *
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"),
 					handlers=[logging.FileHandler(filename="info.log", mode='w'),
@@ -50,6 +56,13 @@ FONT_ROBOTO_H2 = ImageFont.truetype(
 FONT_ROBOTO_P = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans-Bold.ttf'), 20)
 
+WEATHER_FONT = ImageFont.truetype(
+	os.path.join(FONT_DICT, 'DejaVuSans-Bold.ttf'), 20)
+#To display the glyphs for the state of the weather
+WEATHER_EMOJI_FONT = ImageFont.truetype(
+	os.path.join(FONT_DICT, 'NotoEmoji-Regular.ttf'), 20)	
+	
+	
 #The calendar will occupy the same height of the Title Date font, and will have 7 rows.
 #So the size of the font should be at maximum 7 times less (the calendar has 7 rows.)
 #To make sure that there's some space between rows, for the ascenders and descenders and for the size between columns it be half of that.
@@ -151,16 +164,211 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 
 	
 	vertical_margin = height/20
-	# Heading
+	
 	current_height = vertical_margin
 	
+	#First Line
 	draw_blk.line((PADDING_L, current_height, width, current_height),
 				  fill=1, width=LINE_WIDTH)
+	#Weather
+	
+	#Check the temperature units settings
+	global TEMPERATURE_UNIT
+	if 'TEMPERATURE_UNIT' not in globals():
+		TEMPERATURE_UNIT = "C"
+	elif TEMPERATURE_UNIT.upper() not in ['C', 'F']:
+		TEMPERATURE_UNIT = "C"
+
+	try:
+		corrected_location = WEATHER_LOCATION.replace(" ","%20")
+		unit_system = "imperial" if TEMPERATURE_UNIT.upper() == "F" else "metric" 
+		url = f"https://api.tomorrow.io/v4/weather/forecast?location={corrected_location}&units={unit_system}&timesteps=1d&apikey={TOMORROWIO_API_KEY}"
+		headers = {"accept": "application/json"}
+	except:
+		url = None
+		logger.info("Weather tomorrowIO location or API Key not set")
+	
+	tomorrowIO_response = None
+	
+	if url != None:	
+		#Will make a request for weather data.
+		#If there's an error will make it again after 10 minutes
+		try:
+			tomorrowIO_response = requests.get(url, headers=headers)
+			tomorrowIO_response.raise_for_status()
+		except Exception as err:
+		
+			if tomorrowIO_response.status_code == 400:
+				logger.error(f"The URL seems to be malformed. Check the wether parameters on settings - {err}")
+			else:
+				logger.warning(f"Could not make a connection to weather server: {err}. Will try again in 10 minutes.")
+				
+				time.sleep(600)
+				
+				tomorrowIO_response = requests.get(url, headers=headers)
+				
+				try:
+					tomorrowIO_response.raise_for_status()
+				except requests.exceptions.HTTPError as err:
+				# Handle specific HTTP error responses (non-200)
+					print(f"HTTP error occurred: {err}")
+				except Exception as err:
+				# Handle other errors (e.g., network errors)
+					print(f"Other error occurred: {err}")
+	
+	
+	if tomorrowIO_response != None and tomorrowIO_response.status_code == 200:
+		tomorrowIO_response_json = tomorrowIO_response.json()
+		# Get the location
+		responselocation = tomorrowIO_response_json["location"]
+		logger.info(f"Retrieve weather data from {responselocation['name']}, located at {responselocation['lat']}:{responselocation['lon']}")
+		
+		#Get the current weather
+		current_weather = tomorrowIO_response.json()["timelines"]["daily"][0]
+	
+		data_time_str = current_weather["time"]
+		logger.info(f"Data from {data_time_str} for 24 hours")
+		
+		weather_data_values = current_weather["values"]
+	
+		
+		#Maximum temperatures
+		max_temp = weather_data_values["temperatureMax"]
+		#Minimum temperatures
+		min_temp = weather_data_values["temperatureMin"]
+		
+		weatherCodeMax = weather_data_values["weatherCodeMax"]
+	
+			
+		try:	
+			current_height += get_font_height(WEATHER_FONT) + PADDING_TOP
+			
+			weather_box_leading_x = PADDING_L
+			weather_box_trailling_x = width - PADDING_R
+			weather_box_top_y = current_height - get_font_height(WEATHER_FONT)
+			weather_box_bottom_y = current_height 
+			
+			draw_blk.line((PADDING_L, current_height, width, current_height),
+						  fill=1, width=LINE_WIDTH)
+			#Text will be white or red in a black background
+			
+			#background
+			draw_blk.rectangle([(weather_box_leading_x, vertical_margin), (width, weather_box_bottom_y)], fill=1)
+			
+			
+			#Text
+			#Will draw something like ont the bar: |↥🌤️⛈️ ↧☀️ ↧-1ºC ↥5ºC| or |☀️ ↧-1ºC ↥5ºC| if the weather is similar during the day
+
+			#Temperature
+			#It will be draw from right to left.
+			display_celsius = TEMPERATURE_UNIT.upper() != "F"
+			
+			temp_symbol = "℃" if display_celsius else "℉"
+			
+			high_temp_string = str(round(max_temp))
+			high_temp = high_temp_string+temp_symbol # "28℃"
+			high_temp_symbol = "↑"
+			
+			low_temp_string = str(round(min_temp))
+			low_temp = low_temp_string+temp_symbol
+			low_temp_symbol = "↓"
+			
+			draw_blk.text((weather_box_trailling_x, weather_box_bottom_y), high_temp, font=WEATHER_FONT, anchor="rd",  fill=0)
+			
+			high_temp_width = get_font_width(WEATHER_FONT, high_temp_symbol+high_temp)
+			
+			draw_blk.text((weather_box_trailling_x-high_temp_width, weather_box_bottom_y), high_temp_symbol, font=WEATHER_FONT, anchor="ld",  fill=0)
+			
+			high_temp_symbol_space_width = get_font_width(WEATHER_FONT, " " + high_temp_symbol + high_temp)
+			
+			low_temp_string = low_temp_symbol+low_temp
+			
+			draw_blk.text((weather_box_trailling_x-high_temp_symbol_space_width, weather_box_bottom_y), low_temp_symbol+low_temp, font=WEATHER_FONT, anchor="rd",  fill=0)
+			
+			
+			#weather
+			#Maximum wether
+			max_weather_code = weather_data_values["weatherCodeMax"]
+			max_weather_emojis = wheater_codes_emojis[max_weather_code]
+
+			#Minimum weather
+			min_weather_code = weather_data_values["weatherCodeMin"]
+			min_weather_emojis = wheater_codes_emojis[min_weather_code]
+
+
+			weather_leading_space =  weather_box_leading_x + PADDING_R #PADDING_R to give a padding equal to the right side
+			
+			#If both symbols are equal...
+			if max_weather_emojis == min_weather_emojis:
+				#...Only draw one of them 
+				draw_blk.text((weather_leading_space, weather_box_bottom_y), min_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+			
+			else:
+				#Otherwise draws both of them with an arrow pointing up or down with each of them
+				#The low symbol
+				low_weather_string = low_temp_symbol # " ↧"
+	
+				#Draw the low symbol
+				draw_blk.text((weather_leading_space, weather_box_bottom_y), low_weather_string, font=WEATHER_FONT, anchor="ld",  fill=0)
+				
+				#Get the width of the string symbol
+				low_weather_string_width = get_font_width(WEATHER_FONT, low_weather_string)
+				
+				#Get the padding for the low weather state
+				leading_low_weather_emoji = weather_leading_space + low_weather_string_width
+				
+				#Draw the low weather state
+				draw_blk.text((leading_low_weather_emoji, weather_box_bottom_y), min_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+				
+				#Get the width of the string of the low weather state
+				low_weather_string_width = get_font_width(WEATHER_EMOJI_FONT, min_weather_emojis)
+	
+				#The high symbol prefixed with a space for sizing
+				high_weather_string = " " + high_temp_symbol
+				
+				#Get the padding for the high weather state symbol
+				leading_high_weather_string = leading_low_weather_emoji + low_weather_string_width
+				
+				#Draw the high symbol
+				draw_blk.text((leading_high_weather_string, weather_box_bottom_y), high_weather_string, font=WEATHER_FONT, anchor="ld",  fill=0)
+				
+				#Get the width of the high state string symbol
+				high_weather_string_width = get_font_width(WEATHER_FONT, high_weather_string)
+				
+				#Get the width of the string of the high weather state
+				leading_high_weather_emoji = leading_high_weather_string + high_weather_string_width
+				
+				#Draw the high weather state
+				draw_blk.text((leading_high_weather_emoji, weather_box_bottom_y), max_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+
+			
+
+		except:
+			pass
+
+
+	
+	
+				  
+	# Heading
+
 	draw_blk.text((PADDING_L, current_height), month_str.upper(),
 				  font=FONT_ROBOTO_H2, fill=1)
+
+	#Weather
+	#Bounds
+	#weather_box_leading_x = PADDING_L+(width - PADDING_L - PADDING_R)/2
+	#weather_box_trailling_x = width - PADDING_R
+	#weather_box_top_y = current_height
+	#weather_box_bottom_y = current_height + get_font_height(WEATHER_FONT)
+#
+	##draw_red.rectangle([(weather_box_leading_x, weather_box_top_y), (weather_box_trailling_x, weather_box_bottom_y)], outline=1, width= 1)
+	#draw_blk.multiline_text((weather_box_trailling_x, weather_box_top_y), "↥28℃ 18h\n↧12℃ 04h", font=WEATHER_FONT, anchor="ra", align="right", fill=1)
+
+	#Moves the height down
 	current_height += get_font_height(FONT_ROBOTO_H2)
 
-	# Date
+	# Day Number Title
 	current_font_height = get_font_height(TITLE_DATE)
 	
 	#Write weekends days in red
@@ -248,7 +456,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 					draw_red.rectangle([(header_x_leading, header_y_top), (header_x_trailing, header_y_bottom)], fill=1)
 					
 					#Draw the first letter of the weekday in the background color	
-					draw_red.text(day_name_coordinate, day_name_header, font=CALENDAR_HEADER_FONT, anchor="mm", fill=0)	
+					draw_red.text(day_name_coordinate, day_name_header, font=CALENDAR_HEADER_FONT, anchor="mm", fill=0) 
 							  
 				else:
 					draw_blk.rectangle([(header_x_leading, header_y_top), (header_x_trailing, header_y_bottom)], fill=1)
@@ -256,7 +464,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 					#Draw the first letter of the weekday in the background color	
 					draw_blk.text(day_name_coordinate, day_name_header, font=CALENDAR_HEADER_FONT, anchor="mm", fill=0)
 							  
-							  		
+									
 							  
 		elif number_of_weeks > row_number-2:
 			#If there is a days on the month to display in this row will retrieve and draw them
@@ -325,7 +533,9 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			x_position += tally_width
 		current_height += tally_height
 		
-	# Calendar
+
+				  
+	# schedule
 	
 	#Font Heights
 	event_calendar_font_height = get_font_height(EVENT_CALENDAR_FONT)
@@ -334,10 +544,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	#Line height
 	line_height = event_name_font_height * 1.5
 	
-	#Event list Top Vertical padding
-	current_height += line_height
-	
-	
+
 	#Stores the coordinate for later calculate the number of events to get
 	calendar_start_height = current_height
 	#Last line position of the calendar 
@@ -389,10 +596,14 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	end_date_padding = event_start_time_width + column_spacing/2 + event_end_time_width
 	summmary_padding = end_date_padding + column_spacing
 
+
+	#New line
+	current_height += line_height
+	
 	for event in event_list:
 	
 		#Stops the for cycle if the new line will be outside the bounds or is day name/number after it is outside the bounds
-		if current_height + line_height/2 > calendar_end_height or (last_event_day != event.start.date() and current_height + line_height*1.5 > calendar_end_height):
+		if current_height + 2 > calendar_end_height or (last_event_day != event.start.date() and current_height + line_height*1.5 > calendar_end_height):
 			break
 			
 			
@@ -471,7 +682,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		#Calendar Name (padded to the right and using a fitted name defined above to make sure that won't occupies more space that available, as defined by max_calendar_name_width)
 		#Will only be shown if there is more than one calendar
 			draw_blk.text((PADDING_R_COORDINATE, current_height), calendar_names_fitted[event.calendar_name],
-					  	font=EVENT_CALENDAR_FONT, anchor="rs", fill=1)   
+						font=EVENT_CALENDAR_FONT, anchor="rs", fill=1)	 
 
 		#Next line location
 		current_height += line_height

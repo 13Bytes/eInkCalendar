@@ -11,3 +11,4 @@ RPi.GPIO
 lgpio
 gpiozero
 spidev
+requests

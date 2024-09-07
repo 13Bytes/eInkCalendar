@@ -64,6 +64,8 @@ I used the following hardware:
 (The Raspi is a bit overkill if you only want to update the calendar. But since it's powered on anyways, I use it to host many other things as well. If you only want to use it for the calendar, you should take a look at the Raspberry Pi Zero series)
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+* Witty Pi 4 L3V7
+* L3V7 Battery and connectors, if needed for the Witty Pi.
 
 
 <!-- GETTING STARTED -->
@@ -87,6 +89,29 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   sudo make check
   sudo make install
   ```
+  
+* Install Witty Pi software
+  
+  See instructions on the [product description](https://www.uugear.com/product/witty-pi-4-l3v7/) or in the [manual](https://www.uugear.com/doc/WittyPi4L3V7_UserManual.pdf), also available in the hardware section of this repository.
+
+  ```sh
+  wget https://www.uugear.com/repo/WittyPi4/install.sh
+  sudo sh install.sh
+  ```
+  
+  The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
+  Also if don't want a "public" webserver without access control you can remove it by running and restarting your device:
+  ```sh
+  update-rc.d -f uwi remove
+  ```
+  
+  This script will also install wiring pi so you can skip the next step.
+  
+  To update this software repeat these steps.
+  
+  **Note:** When mounting the hardware, the Raspberry pi would only boot with the Witty Pi and the e-Paper driver HAT both connected after installing this software.
+
+
 * Install wiringPi libraries
   ```sh
   sudo apt-get install wiringpi
@@ -96,6 +121,7 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   wget https://project-downloads.drogon.net/wiringpi-latest.deb
   sudo dpkg -i wiringpi-latest.deb
   ```
+  
 
 * Install the locales
 ```sh

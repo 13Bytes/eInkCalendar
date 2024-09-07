@@ -93,6 +93,11 @@ EVENT_NAME_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 22)
 EVENT_CALENDAR_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans-Bold.ttf'), 18)
+	
+FOOTNOTE_FONT = ImageFont.truetype(
+	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
+	
+	
 LINE_WIDTH = 3
 
 
@@ -743,10 +748,11 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	current_height = calendar_end_height
 	draw_blk.line((PADDING_L, current_height, width, current_height),
 				  fill=1, width=LINE_WIDTH)
-	current_height += PADDING_TOP
+	
 
 	#Only show Aperture Images if the user wants 
 	if APERTURE_DECORATIONS:
+		current_height += PADDING_TOP
 		# Portal-Icons
 		y = PADDING_L
 		bithday_persons = get_birthdays()
@@ -767,6 +773,14 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			draw_red.text((PADDING_L, int(current_height)), bithday_person_string,
 						  font=FONT_ROBOTO_P, fill=1)
 			current_height += get_font_height(FONT_ROBOTO_P)
+	
+
+	#Footnote with data
+	#Will print current date and hour for update reference 
+	now = datetime.now()
+	draw_blk.text((PADDING_R_COORDINATE, height), now.strftime('%x')+" "+now.strftime('%X'),
+						font=FOOTNOTE_FONT, anchor="rd", fill=1)	 
+
 	
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):

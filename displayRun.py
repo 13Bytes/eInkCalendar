@@ -7,6 +7,8 @@ import random
 import sys
 import time
 from datetime import datetime
+import zoneinfo
+
 import calendar
 
 from holidays import country_holidays
@@ -180,10 +182,28 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		TEMPERATURE_UNIT = "C"
 
 	try:
-		corrected_location = WEATHER_LOCATION.replace(" ","%20")
+
 		unit_system = "imperial" if TEMPERATURE_UNIT.upper() == "F" else "metric" 
-		url = f"https://api.tomorrow.io/v4/weather/forecast?location={corrected_location}&units={unit_system}&timesteps=1d&apikey={TOMORROWIO_API_KEY}"
-		headers = {"accept": "application/json"}
+
+
+		url = f"https://api.tomorrow.io/v4/timelines?apikey={TOMORROWIO_API_KEY}"
+
+		payload = {
+		    "location": WEATHER_LOCATION,
+		    "fields": ["temperatureMax", "temperatureMin", "weatherCodeDay", "weatherCodeNight", "weatherCode", "temperatureMinTime", "temperatureMaxTime", "sunriseTime", "sunsetTime"],
+		    "units": unit_system,
+		    "timesteps": ["1d"],
+		    "startTime": "now",
+		    "endTime": "nowPlus1d"
+		}
+		headers = {
+		    "accept": "application/json",
+		    "Accept-Encoding": "gzip",
+		    "content-type": "application/json"
+		}
+
+
+
 	except:
 		url = None
 		logger.info("Weather tomorrowIO location or API Key not set")
@@ -194,7 +214,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		#Will make a request for weather data.
 		#If there's an error will make it again after 10 minutes
 		try:
-			tomorrowIO_response = requests.get(url, headers=headers)
+			tomorrowIO_response = requests.post(url, json=payload, headers=headers)
 			tomorrowIO_response.raise_for_status()
 		except Exception as err:
 		
@@ -205,7 +225,7 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 				
 				time.sleep(600)
 				
-				tomorrowIO_response = requests.get(url, headers=headers)
+				tomorrowIO_response = requests.post(url, json=payload, headers=headers)
 				
 				try:
 					tomorrowIO_response.raise_for_status()
@@ -220,24 +240,75 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	if tomorrowIO_response != None and tomorrowIO_response.status_code == 200:
 		tomorrowIO_response_json = tomorrowIO_response.json()
 		# Get the location
-		responselocation = tomorrowIO_response_json["location"]
-		logger.info(f"Retrieve weather data from {responselocation['name']}, located at {responselocation['lat']}:{responselocation['lon']}")
+		#responselocation = tomorrowIO_response_json["location"]
+		logger.info(f"Retrieved weather data for {WEATHER_LOCATION}.")
 		
 		#Get the current weather
-		current_weather = tomorrowIO_response.json()["timelines"]["daily"][0]
-	
-		data_time_str = current_weather["time"]
-		logger.info(f"Data from {data_time_str} for 24 hours")
+		weather_data_by_interval = tomorrowIO_response_json["data"]["timelines"][0]["intervals"]
 		
-		weather_data_values = current_weather["values"]
-	
 		
-		#Maximum temperatures
-		max_temp = weather_data_values["temperatureMax"]
-		#Minimum temperatures
-		min_temp = weather_data_values["temperatureMin"]
+		# Get the current time in the local timezone
+		local_timezone = zoneinfo.ZoneInfo("localtime")
+		now = datetime.now(local_timezone)
+
+		#Get an dict of results with a tuple were the key is the datetime of the forecast
+		max_temp_date = { datetime.fromisoformat(interval["values"]["temperatureMaxTime"]): interval["values"]["temperatureMax"] for interval in weather_data_by_interval}
+		min_temp_date = { datetime.fromisoformat(interval["values"]["temperatureMinTime"]): interval["values"]["temperatureMin"] for interval in weather_data_by_interval}
 		
-		weatherCodeMax = weather_data_values["weatherCodeMax"]
+		
+		#Select the max temperature
+		#It will be the one closest with the current time on the current day or after.
+
+		#If there more that 1 value will test for the ones of the current day or after
+		if len(max_temp_date) > 1:
+			#Current day at midnight
+			midnight_today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+			max_temp_date_filtered = [time for time in max_temp_date if time > midnight_today]
+		
+			#Will get the datetime of the value closest to now
+			max_closest_time = min(max_temp_date_filtered, key=lambda date: abs(now - date))
+		
+			#Will define the maximum temperature
+			max_temp = max_temp_date[max_closest_time]
+		else:
+			max_temp = max_temp_date.values()[0]
+			
+			
+		#Select the min temperature
+		#It will be the one closest with the current time.
+		# I think is the best way to have a meaningfull value
+		min_closest_time = min(min_temp_date.keys(), key=lambda date: abs(now - date))
+		min_temp = min_temp_date[min_closest_time]
+		
+		
+		#Get the next sunset and sunrise
+		sunrises_times = [datetime.fromisoformat(interval["values"]["sunriseTime"]) for interval in weather_data_by_interval]
+		sunsets_times =  [datetime.fromisoformat(interval["values"]["sunsetTime"]) for interval in weather_data_by_interval]
+
+		next_sunrise = min([sunrise for sunrise in sunrises_times if sunrise >= now])
+		next_sunset = min([sunset for sunset in sunsets_times if sunset >= now])
+
+		#Get the day/night status
+		is_night = next_sunrise < next_sunset
+		
+		#WeatherCodeDay
+		#Test if the current time is at night (between sunset and sunrise). If the sunrise is before the next predition use the current weathercodeDay prediction. Otherwise use the next one.
+		#This is only to not show a prediction fior a period in the past (if the next prediction is before the new day the current weather code for the day time is for yestarday)
+		if is_night and len(weather_data_by_interval)>1 and next_sunrise > datetime.fromisoformat(weather_data_by_interval[1]["startTime"]):
+			weatherCodeDay = weather_data_by_interval[1]["values"]["weatherCodeDay"]
+		else:
+			weatherCodeDay = weather_data_by_interval[0]["values"]["weatherCodeDay"]
+			
+			
+		#WeatherCodeNight
+		#Test if the current time is at day (between sunrise and sunset). If the sunset is before the next predition use the current weathercodeNight prediction. Otherwise use the next one.
+		if not is_night and len(weather_data_by_interval)>1 and next_sunset > datetime.fromisoformat(weather_data_by_interval[1]["startTime"]):
+			weatherCodeNight = weather_data_by_interval[1]["values"]["weatherCodeNight"]
+		else:
+			weatherCodeNight = weather_data_by_interval[0]["values"]["weatherCodeNight"]
+		
+		
+		
 	
 			
 		try:	
@@ -287,64 +358,44 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 			
 			
 			#weather
-			#Maximum wether
-			max_weather_code = weather_data_values["weatherCodeMax"]
-			max_weather_emojis = wheater_codes_emojis[max_weather_code]
 
-			#Minimum weather
-			min_weather_code = weather_data_values["weatherCodeMin"]
-			min_weather_emojis = wheater_codes_emojis[min_weather_code]
 
 
 			weather_leading_space =  weather_box_leading_x + PADDING_R #PADDING_R to give a padding equal to the right side
 			
-			#If both symbols are equal...
-			if max_weather_emojis == min_weather_emojis:
+			#If both weather codes are equal...
+			if weatherCodeDay//10 == weatherCodeNight//10:
 				#...Only draw one of them 
-				draw_blk.text((weather_leading_space, weather_box_bottom_y), min_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+				all_weather_emojis = wheater_codes_emojis[weatherCodeNight//10]
+				
+				draw_blk.text((weather_leading_space, weather_box_bottom_y), all_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
 			
 			else:
 				#Otherwise draws both of them with an arrow pointing up or down with each of them
-				#The low symbol
-				low_weather_string = low_temp_symbol # " ↧"
-	
-				#Draw the low symbol
-				draw_blk.text((weather_leading_space, weather_box_bottom_y), low_weather_string, font=WEATHER_FONT, anchor="ld",  fill=0)
-				
-				#Get the width of the string symbol
-				low_weather_string_width = get_font_width(WEATHER_FONT, low_weather_string)
-				
-				#Get the padding for the low weather state
-				leading_low_weather_emoji = weather_leading_space + low_weather_string_width
-				
+				#Day weather
+				day_weather_emojis = wheater_codes_emojis[weatherCodeDay]
+
+				#Night weather
+				night_weather_emojis = wheater_codes_emojis[weatherCodeNight]
+
+
 				#Draw the low weather state
-				draw_blk.text((leading_low_weather_emoji, weather_box_bottom_y), min_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+				draw_blk.text((weather_leading_space, weather_box_bottom_y), day_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
 				
-				#Get the width of the string of the low weather state
-				low_weather_string_width = get_font_width(WEATHER_EMOJI_FONT, min_weather_emojis)
+				#Get the width of the string of the day weather state
+				day_weather_string_width = get_font_width(WEATHER_EMOJI_FONT, day_weather_emojis+" ")
 	
-				#The high symbol prefixed with a space for sizing
-				high_weather_string = " " + high_temp_symbol
-				
 				#Get the padding for the high weather state symbol
-				leading_high_weather_string = leading_low_weather_emoji + low_weather_string_width
-				
-				#Draw the high symbol
-				draw_blk.text((leading_high_weather_string, weather_box_bottom_y), high_weather_string, font=WEATHER_FONT, anchor="ld",  fill=0)
-				
-				#Get the width of the high state string symbol
-				high_weather_string_width = get_font_width(WEATHER_FONT, high_weather_string)
-				
-				#Get the width of the string of the high weather state
-				leading_high_weather_emoji = leading_high_weather_string + high_weather_string_width
-				
-				#Draw the high weather state
-				draw_blk.text((leading_high_weather_emoji, weather_box_bottom_y), max_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+				night_weather_padding = weather_leading_space + day_weather_string_width
 
-			
+				
+				#Draw the night symbol
+				draw_blk.text((night_weather_padding, weather_box_bottom_y), night_weather_emojis, font=WEATHER_EMOJI_FONT, anchor="ld",  fill=0)
+							
 
-		except:
-			pass
+		except Exception as err:
+			# Handle other errors (e.g., network errors)
+			print(f"Error occurred: {err}")
 
 
 	

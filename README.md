@@ -4,9 +4,9 @@
 <h3 align="center">Portal eInk Calendar</h3>
 
   <p align="center">
-    A small desk-calendar with the theme of a <a href="https://store.steampowered.com/app/620/Portal_2/">portal</a> chamber info.
+    A small desk-calenda with the theme of a <a href="https://store.steampowered.com/app/620/Portal_2/">portal</a> chamber info.
     <br />
-    It displays the current date, the next few events in your calendar and whether a person in your contact list has a birthday (inc. their name).
+    It displays the current date, the next few events from one or more calendars, the current weather, a rotating quote and whether a person in your contact list has a birthday (inc. their name).
   </p>
 </div>
 
@@ -62,13 +62,14 @@ I used the following hardware:
 * [Waveshare 800×480, 7.5inch E-Ink display (13505)](https://www.waveshare.com/product/displays/7.5inch-e-paper-hat-b.htm)
 * [Raspberry Pi 3b](https://www.raspberrypi.com/products/raspberry-pi-3-model-b/)\
 (The Raspi is a bit overkill if you only want to update the calendar. But since it's powered on anyways, I use it to host many other things as well. If you only want to use it for the calendar, you should take a look at the Raspberry Pi Zero series)
+
+* [Witty Pi 4 L3V7](https://www.uugear.com/product/witty-pi-4-l3v7/)
+* L3V7 Battery (Samsung inr18650-35e) and connectors, if needed, for the Witty Pi.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-* Witty Pi 4 L3V7
-* L3V7 Battery and connectors, if needed for the Witty Pi.
-
-
 <!-- GETTING STARTED -->
+
 ## Getting Started
 
 ### Prerequisites
@@ -89,7 +90,9 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   sudo make check
   sudo make install
   ```
-  
+*  sudo apt-get install openssl
+
+
 * Install Witty Pi software
   
   See instructions on the [product description](https://www.uugear.com/product/witty-pi-4-l3v7/) or in the [manual](https://www.uugear.com/doc/WittyPi4L3V7_UserManual.pdf), also available in the hardware section of this repository.
@@ -102,24 +105,23 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
   Also if don't want a "public" webserver without access control you can remove it by running and restarting your device:
   ```sh
-  update-rc.d -f uwi remove
+  sudo update-rc.d -f uwi remove
   ```
   
   This script will also install wiring pi so you can skip the next step.
   
   To update this software repeat these steps.
   
-  **Note:** When mounting the hardware, the Raspberry pi would only boot with the Witty Pi and the e-Paper driver HAT both connected after installing this software.
+  **Note:** When assembling the hardware, the Raspberry pi would only boot with the Witty Pi and the e-Paper driver HAT both connected after installing this software.
 
 
 * Install wiringPi libraries
-  ```sh
-  sudo apt-get install wiringpi
-  
-  #For Pi 4, you need to update it：
+  They will allow the use of the `gpio` command, used all over the place by witty. The most current version can be found in the [github repo](https://github.com/WiringPi/WiringPi) in the [releases folder](https://github.com/WiringPi/WiringPi/releases).
+  Download:
+    ```sh
   cd /tmp
-  wget https://project-downloads.drogon.net/wiringpi-latest.deb
-  sudo dpkg -i wiringpi-latest.deb
+  wget [insert link to arm.deb file here eg: https://github.com/WiringPi/WiringPi/releases/download/3.8/wiringpi_3.8_arm64.deb]
+  sudo dpkg -i wiringpi-[insert file version here].deb
   ```
   
 
@@ -199,7 +201,14 @@ Make sure that later in settings the locale is one of the selected here (and inc
 
 - `TEMPERATURE_UNIT = "C" ` Temperature Units (can be C for Celsius or F for Fahrenheit)
 
-`
+- `RECHARGE_VOlTAGE = 3.5 ` Voltage when the device will notify for a recharge in Volts. 3.5V is about 25% of charge for the battery that I'm using (samsung inr18650-35e), but this will change. Please see your battery datasheet.
+
+
+4. Configure Witty Pi enviroment (settings and scripts). Use the `wittyPi.sh`:
+	1. Configure the white blink light to disabled (to strong and repetitive).
+	2. In the startup the witty pi script `afterStartup.sh` will be made to run the `run_calendar_witty.sh` that will run the `run_calendar.sh` and then shutdown the computer. Please make sure that the commands on those scripts have the correct paths. The PATH environment is not defined when they run so the full path must be used. Check the paths on your system with `whereis <command>`.
+	3. Add the line `/home/pi<or other username>/eInkCalendar/run_calendar_witty.sh` to `~/wittypi/afterStartup.sh`.
+	
 4. Add the start-script to your boot-process:\
    (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)
 

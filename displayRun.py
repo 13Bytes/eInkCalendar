@@ -780,8 +780,9 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	now = datetime.now()
 	draw_blk.text((PADDING_R_COORDINATE, height), now.strftime('%x')+" "+now.strftime('%X'),
 						font=FOOTNOTE_FONT, anchor="rd", fill=1)	 
-
-	
+	#Battery charge:
+	#Only show a low bat indicator when in battery and its depleted.
+	#Get for the registers 1 and 2
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
 	logger.info("Exporting final images")

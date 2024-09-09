@@ -29,6 +29,10 @@ from dataHelper import get_events, get_birthdays
 from displayHelpers import *
 from settings import *
 
+#For reading battery levels from the I2C bus (will assume that witty pi is on address 0x08 address)
+from smbus2 import SMBus
+
+
 #Get the conversion from the weather codes to emoji symbols
 from weatherCodesEmoji import *
 
@@ -97,6 +101,9 @@ EVENT_CALENDAR_FONT = ImageFont.truetype(
 FOOTNOTE_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
 	
+#To display the battery state
+BATTERY_EMOJI_FONT = ImageFont.truetype(
+	os.path.join(FONT_DICT, 'NotoEmoji-Regular.ttf'), 30)		
 	
 LINE_WIDTH = 3
 
@@ -780,6 +787,34 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	now = datetime.now()
 	draw_blk.text((PADDING_R_COORDINATE, height), now.strftime('%x')+" "+now.strftime('%X'),
 						font=FOOTNOTE_FONT, anchor="rd", fill=1)	 
+						
+	#Will print battery levels
+	
+	bus = SMBus(1)
+	# 1 Integer part for input voltage, 2 Decimal part (multiple 100 times) for input voltage
+	battery_voltage = float(bus.read_byte_data(8, 1) + bus.read_byte_data(8, 2)/100)
+	#7 Power mode:  Power via LDO regulator = 1, Input 5V via USB Type C = 0
+	is_charging = bus.read_byte_data(8, 7) == 0
+	bus.close()
+	
+	try:
+		should_recharge = battery_voltage <= RECHARGE_VOlTAGE
+	except:
+		should_recharge = false
+		
+	if is_charging:
+	# print a charging icon
+		draw_blk.text((PADDING_L, current_height), "⚡️🔋",
+						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
+	elif should_recharge:
+	# Print a low charge icon in red
+		draw_red.text((PADDING_L, current_height), "🪫",
+						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
+	else:
+	# Batt full
+		draw_blk.text((PADDING_L, current_height), "🔋",
+						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
+						  
 	#Battery charge:
 	#Only show a low bat indicator when in battery and its depleted.
 	#Get for the registers 1 and 2

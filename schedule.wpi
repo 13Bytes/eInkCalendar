@@ -4,5 +4,5 @@ END   2064-09-01 00:15:00
 #Will stay on 15 minutes (the displayRun.py has a timeout of 10 minutes for a network connection retry)
 ON    M15
 
-#Will startup again in 15 minutes (for testing). It should be about 6 hours (6H) in production.
+#Will startup again in 15 minutes (for testing). It should be about 6 hours (H6) in production.
 OFF   M15

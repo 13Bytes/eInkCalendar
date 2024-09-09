@@ -207,7 +207,7 @@ Make sure that later in settings the locale is one of the selected here (and inc
 4. Configure Witty Pi enviroment (settings and scripts). Use the `wittyPi.sh`:
 	1. Configure the white blink light to disabled (to strong and repetitive).
 	2. In the startup the witty pi script `afterStartup.sh` will be made to run the `run_calendar_witty.sh` that will run the `run_calendar.sh` and then shutdown the computer. Please make sure that the commands on those scripts have the correct paths. The PATH environment is not defined when they run so the full path must be used. Check the paths on your system with `whereis <command>`.
-	3. Add the line `/home/pi<or other username>/eInkCalendar/run_calendar_witty.sh` to `~/wittypi/afterStartup.sh`.
+	3. Add the line `/home/pi<or other username>/eInkCalendar/run_calendar_witty.sh &` to `~/wittypi/afterStartup.sh`. Note the use of the amperstand in the end of the line to not block the startup process.
 	
 4. Add the start-script to your boot-process:\
    (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)

@@ -12,3 +12,4 @@ lgpio
 gpiozero
 spidev
 requests
+smbus2

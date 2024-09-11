@@ -788,8 +788,8 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 	draw_blk.text((PADDING_R_COORDINATE, height), now.strftime('%x')+" "+now.strftime('%X'),
 						font=FOOTNOTE_FONT, anchor="rd", fill=1)	 
 						
-	#Will print battery levels
-	
+	#BATTERY LEVELS
+	#Will show a red empty battery for charging when the battery is more empty 
 	bus = SMBus(1)
 	# 1 Integer part for input voltage, 2 Decimal part (multiple 100 times) for input voltage
 	battery_voltage = float(bus.read_byte_data(8, 1) + bus.read_byte_data(8, 2)/100)
@@ -801,23 +801,45 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		should_recharge = battery_voltage <= RECHARGE_VOlTAGE
 	except:
 		should_recharge = false
+	
+	
+	if should_recharge:
+		image_bat = Image.open(os.path.join(PICTURE_DICT, "battery-icon-1_3.bmp"))
 		
-	if is_charging:
-	# print a charging icon
-		draw_blk.text((PADDING_L, current_height), "⚡️🔋",
-						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
-	elif should_recharge:
-	# Print a low charge icon in red
-		draw_red.text((PADDING_L, current_height), "🪫",
-						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
-	else:
-	# Batt full
-		draw_blk.text((PADDING_L, current_height), "🔋",
-						  font=BATTERY_EMOJI_FONT, anchor="la", fill=1)
-						  
-	#Battery charge:
-	#Only show a low bat indicator when in battery and its depleted.
-	#Get for the registers 1 and 2
+		_, height = image_bat.size
+		image_vertical_padding = abs(round((vertical_margin-height)/2))
+		image_red.paste(image_bat, (PADDING_L, image_vertical_padding))
+		image_bat.close()
+		
+	#A more compreensive battery status icons
+	# 	
+# 	print_bat_red = False
+# 	if is_charging:
+# 	# print a charging icon
+# 		bat_file = "battery-icon-charging.bmp"
+# 	elif should_recharge:
+# 	# Print a low charge icon in red
+# 		bat_file = "battery-icon-1_3.bmp"
+# 		print_bat_red = True
+# 	else:
+# 	# Batt full
+# 		bat_file = "battery-icon-3_3.bmp"
+# 						  
+# 	#Battery charge:
+# 	#Only show a low bat indicator when in battery and its depleted.
+# 	#Get for the registers 1 and 2
+# 	image_bat = Image.open(os.path.join(PICTURE_DICT, bat_file))
+# 
+# 	_, height = image_bat.size
+# 	image_vertical_padding = abs(round((vertical_margin-height)/2))
+# 	
+# 	if print_bat_red:
+# 		image_red.paste(image_bat, (PADDING_L, image_vertical_padding))
+# 	else:
+# 		image_blk.paste(image_bat, (PADDING_L, image_vertical_padding))
+# 	
+# 	image_bat.close()
+
 
 def show_content(epd: eInk.EPD, image_blk: TImage, image_red: TImage):
 	logger.info("Exporting final images")

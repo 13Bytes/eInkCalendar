@@ -4,9 +4,11 @@
 <h3 align="center">Portal eInk Calendar</h3>
 
   <p align="center">
-    A small desk-calenda with the theme of a <a href="https://store.steampowered.com/app/620/Portal_2/">portal</a> chamber info.
+    A small battery powered desk-calenda with the theme of a <a href="https://store.steampowered.com/app/620/Portal_2/">portal</a> chamber info.
     <br />
     It displays the current date, the next few events from one or more calendars, the current weather, a rotating quote and whether a person in your contact list has a birthday (inc. their name).
+    <br />
+    
   </p>
 </div>
 
@@ -48,7 +50,12 @@ The finished project on my desk:
 The pie is displayed when a person in your contacts has a birthday (along with the name below it).
 The other three icons are currently displayed randomly.
 
+<p align="right">(<a href="#top">back to top</a>)</p>
 
+### Battery
+The device will power itself on regularly (by default 6/6h but this can be changed on the  file `~/wittypi/schedule.wpi`) update the screen and shutdown, preserving battery life.
+
+When battery is near depleting it will display a red empty battery icon on the upper left corner. On that state it will have charge for a good number of cycles but could be a good idea to charge the battery to preserve its health.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

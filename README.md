@@ -109,6 +109,14 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   sudo sh install.sh
   ```
   
+  Configure the Witty Pi so it won't boot when charging. The default state of the device is off and it don't need to power on to charge the battery:
+    ```sh
+  cd ~/wittypi/
+  sudo sh install.sh
+  ./wittyPi.sh 
+  ```
+  Set `Auto-On when USB 5V is connected` to `No`.
+  
   The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
   Also if don't want a "public" webserver without access control you can remove it by running and restarting your device:
   ```sh
@@ -261,8 +269,11 @@ You can <a href="#contact">contact</a> me, or create a [issue](https://github.co
 
 <!-- CONTACT -->
 ## Contact
-
+Original Idea and Design:
 Louis - [@Louis_D_](https://twitter.com/Louis_D_) - coding@13bytes.de
+
+Original Idea and Design:
+João - @joao - coding@colaco.me
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

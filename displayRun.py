@@ -101,10 +101,6 @@ EVENT_CALENDAR_FONT = ImageFont.truetype(
 FOOTNOTE_FONT = ImageFont.truetype(
 	os.path.join(FONT_DICT, 'DejaVuSans.ttf'), 8)
 	
-#To display the battery state
-BATTERY_EMOJI_FONT = ImageFont.truetype(
-	os.path.join(FONT_DICT, 'NotoEmoji-Regular.ttf'), 30)		
-	
 LINE_WIDTH = 3
 
 
@@ -221,24 +217,41 @@ def render_content(draw_blk: TImageDraw, image_blk: TImage,	 draw_red: TImageDra
 		logger.info("Weather tomorrowIO location or API Key not set")
 	
 	tomorrowIO_response = None
+	wait_for_new_request = False
 	
 	if url != None:	
 		#Will make a request for weather data.
 		#If there's an error will make it again after 10 minutes
 		try:
 			tomorrowIO_response = requests.post(url, json=payload, headers=headers)
-			tomorrowIO_response.raise_for_status()
-		except Exception as err:
+		except:
+			tomorrowIO_response = None
+			wait_for_new_request = True
 		
-			if tomorrowIO_response.status_code == 400:
-				logger.error(f"The URL seems to be malformed. Check the wether parameters on settings - {err}")
-			else:
-				logger.warning(f"Could not make a connection to weather server: {err}. Will try again in 10 minutes.")
+		if 	tomorrowIO_response != None:
+			try:
+				tomorrowIO_response.raise_for_status()
+			except Exception as err:
+				wait_for_new_request = True
 				
-				time.sleep(600)
-				
+				if tomorrowIO_response.status_code == 400:
+					logger.error(f"The URL seems to be malformed. Check the wether parameters on settings - {err}")
+				else:
+					logger.warning(f"Could not make a connection to weather server: {err}. Will try again in 10 minutes.")
+					
+					
+		if wait_for_new_request:			
+			#If there was an error try again 10 minutes later
+			time.sleep(600)
+			
+			#try again a request
+			try:
 				tomorrowIO_response = requests.post(url, json=payload, headers=headers)
-				
+			except:
+				tomorrowIO_response = None
+			
+			#Check the response
+			if 	tomorrowIO_response != None:
 				try:
 					tomorrowIO_response.raise_for_status()
 				except requests.exceptions.HTTPError as err:

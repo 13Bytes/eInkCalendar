@@ -53,9 +53,9 @@ The other three icons are currently displayed randomly.
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Battery
-The device will power itself on regularly (by default 6/6h but this can be changed on the  file `~/wittypi/schedule.wpi`) update the screen and shutdown, preserving battery life.
+The device will power itself on regularly (by default 6/6h but this can be changed on the  file `~/wittypi/schedule.wpi`) to update the screen and then shutdown, preserving battery life.
 
-When battery is near depleting it will display a red empty battery icon on the upper left corner. On that state it will have charge for a good number of cycles but could be a good idea to charge the battery to preserve its health.
+When battery is near depleting it will display a red empty battery icon on the upper left corner. On that state it will still power-up for a good number of cycles, but could be a good idea to charge the battery to preserve its health.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -72,6 +72,9 @@ I used the following hardware:
 
 * [Witty Pi 4 L3V7](https://www.uugear.com/product/witty-pi-4-l3v7/)
 * L3V7 Battery (Samsung inr18650-35e) and connectors, if needed, for the Witty Pi.
+* [External panel button](https://www.amazon.es/dp/B09MBDMPDT) for for powering up and down.
+* [External USB-C panel extension port](https://www.amazon.es/dp/B0D17K3CCY) for battery charging.
+
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

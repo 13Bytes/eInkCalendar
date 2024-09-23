@@ -28,8 +28,11 @@ FIRST_WEEKDAY_IS_SUNDAY = True
 #For accessing the weather please go to tomorrow.io register for a free account and insert the key here. Empty or commented so to not show the weather.
 TOMORROWIO_API_KEY = "[insert api key here]"
 
-#Location for weather forecast. Empty or comment to not show weather. Do not use commas.
-WEATHER_LOCATION = "Hamburg DE"
+#Location for weather forecast.
+#A latitude-longitude pair of numbers according to ISO 6709, separated by , in query parameters
+#See also https://docs.tomorrow.io/reference/api-formats#locations
+#Sample is for Hamburg DE
+WEATHER_LOCATION = "53.551086,9.993682"
 
 #Temperature Units (can be C for Celsius or F for Fahrenheit), the default is C
 TEMPERATURE_UNIT = "C"

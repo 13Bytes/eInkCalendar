@@ -117,6 +117,8 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   ```
   Set `Auto-On when USB 5V is connected` to `No`.
   
+  Also on these settings choose  `Synchronize with network time`and `Write RTC time to system`.
+    
   The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
   Also if don't want a "public" webserver without access control you can remove it by running and restarting your device:
   ```sh
@@ -212,7 +214,7 @@ Make sure that later in settings the locale is one of the selected here (and inc
 
 - `TOMORROWIO_API_KEY = "[insert api key here]" For accessing the weather please go to (tomorrow.io)[https://tomorrow.io/] register for a free account and insert the key here. When empty or commented will make not show the weather.
 
-- `WEATHER_LOCATION = "Hamburg DE"` Location for weather forecast. Empty or commented so to not showing the weather. Can use the country after the city but without commas. Also latitude and longitude. Se reference on [tomorrow.io api](https://docs.tomorrow.io/reference/weather-forecast)
+- `WEATHER_LOCATION = "53.551086,9.993682"` Location for weather forecast. Empty or commented so to not showing the weather. A latitude-longitude pair of numbers according to ISO 6709, separated by , in query parameters. See also [tomorrow.io api formats](https://docs.tomorrow.io/reference/api-formats#locations). Note: This example is for Hamburg DE.
 
 - `TEMPERATURE_UNIT = "C" ` Temperature Units (can be C for Celsius or F for Fahrenheit)
 
@@ -248,7 +250,7 @@ The STLs of the frame can be found in [hardware](https://github.com/13Bytes/eInk
 It's designed for 3D-printing.
 The two parts can be screwed together in three of the four corners.
 
-The raspi is held in place by threaded heat set inserts.
+The raspi is held in place by threaded heat set inserts (M2.5).
 
 
 <img src="https://user-images.githubusercontent.com/12069002/150642718-5a24c717-1a19-4883-b932-1f1588f124fa.png" height=400>
@@ -258,6 +260,13 @@ The raspi is held in place by threaded heat set inserts.
 
 
 ## Questions
+
+### The battery was dead and now the screen doesn't refresh, what can I do?
+The clock is out of sync. Run the `wittyPi.sh`script, Synchronize with network time`, and `Write RTC time to system`.
+
+### It doens't boot?
+Witty Pi sometimes can crash on shutdown, especially after a RTC reset. You must try to disconnect it from its power sources: the USB cable and the battery. Then try to restart the pi.
+
 
 Stuck somewhere? \
 You can <a href="#contact">contact</a> me, or create a [issue](https://github.com/13Bytes/eInkCalendar/issues).

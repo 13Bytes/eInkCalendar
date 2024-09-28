@@ -111,28 +111,12 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
   wget https://www.uugear.com/repo/WittyPi4/install.sh
   sudo sh install.sh
   ```
-  
-  Configure the Witty Pi so it won't boot when charging. The default state of the device is off and it don't need to power on to charge the battery:
-    ```sh
-  cd ~/wittypi/
-  sudo sh install.sh
-  ./wittyPi.sh 
-  ```
-  Set `Auto-On when USB 5V is connected` to `No`.
-  
-  Also on these settings choose  `Synchronize with network time`and `Write RTC time to system`.
-    
-  The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
-  Also if don't want a "public" webserver without access control you can remove it by running and restarting your device:
-  ```sh
-  sudo update-rc.d -f uwi remove
-  ```
-  
+
   This script will also install wiring pi so you can skip the next step.
   
   To update this software repeat these steps.
   
-  **Note:** When assembling the hardware, the Raspberry pi would only boot with the Witty Pi and the e-Paper driver HAT both connected after installing this software.
+  **Note:** When assembling the hardware, the Raspberry pi would only boot, when both the Witty Pi and the e-Paper driver HAT are connected, after installing this software.
 
 
 * Install wiringPi libraries
@@ -150,6 +134,7 @@ The prerequisites are based on [this](https://www.waveshare.com/wiki/7.5inch_e-P
 sudo dpkg-reconfigure locales
 ```
 Make sure that later in settings the locale is one of the selected here (and include the .utf8 if is in the name).
+
 ### Installation
 
 1. Clone the repo
@@ -226,22 +211,45 @@ Make sure that later in settings the locale is one of the selected here (and inc
 
 4. Configure Witty Pi enviroment (settings and scripts). Use the `wittyPi.sh`:
 	1. Configure the white blink light to disabled (to strong and repetitive).
-	2. In the startup the witty pi script `afterStartup.sh` will be made to run the `run_calendar_witty.sh` that will run the `run_calendar.sh` and then shutdown the computer. Please make sure that the commands on those scripts have the correct paths. The PATH environment is not defined when they run so the full path must be used. Check the paths on your system with `whereis <command>`.
-	3. Add the line `/home/pi<or other username>/eInkCalendar/run_calendar_witty.sh &` to `~/wittypi/afterStartup.sh`. Note the use of the amperstand in the end of the line to not block the startup process.
+	  
+	2. Configure the Witty Pi so it won't boot when charging with `Auto-On when USB 5V is connected` to `No`. The default state of this device is off and it don't need to be power on to charge the battery:
+	3. Also on these settings choose `Synchronize with network time`and `Write RTC time to system`.
+    
+	4. The software installs a webserver for configuring the Witty (the script ./wittyPi.sh seems to have the same functionality). The configuration for the server assumes that is installed in /home/pi/uwi, if not please change `~/uwi/uwi.conf`.
 	
-4. Add the start-script to your boot-process:\
-   (You might need to adapt the path `/home/pi/eInkCalendar/run_calendar.sh` acordingly)
+	Note that if  you don't want a "public" webserver without user access control you can **remove it** by running this command and restarting your device:
+	```sh
+	sudo update-rc.d -f uwi remove
+	```
 
-   Make `run_calendar.sh` executable
-   ```sh
-   chmod +x /home/pi/eInkCalendar/run_calendar.sh
-   ``` 
-   and add it to crontab, as follows:
-   ```sh
-   crontab -e
-   ```
-   and add following line:\
-   ```@reboot sleep 60 && /home/pi/eInkCalendar/run_calendar.sh```
+
+5. In the startup the witty pi script `afterStartup.sh` should run the `/home/<insert user here>/eInkCalendar/run_calendar_witty.sh` on the background with this line:
+	 
+```sh
+/home/<insert user here>/eInkCalendar/run_calendar_witty.sh &
+```
+	
+This will run the `run_calendar.sh` script and wait to shutdown the computer.
+	
+Please make sure that the commands on all those scripts have the correct paths. The PATH environment is not defined when they run so the full path must be used. Check the paths on your system with `whereis <command>`.
+
+6. Add the line `/home/pi<or other username>/eInkCalendar/run_calendar_witty.sh &` to `~/wittypi/afterStartup.sh`. Note the use of the amperstand in the end of the line to not block the startup process.
+
+7. The script `~/wittypi/runScript.sh` has a bug described [here](https://www.uugear.com/forums/technial-support-discussion/locked-witty-pi-after-rescheduling-and-shutdown-on-slower-systems/), that can crash the system when shutting down on some slower systems. The fiz is described on the post. Also a fixed script is in the [Witty Pi folder](/hardware/Witty%20Pi%204%20L3V7/).
+
+7. Create or change the `~/wittypi/schedule.wpi` and run `~/wittypi/runScript.sh`. This will create the schedule of startup and shutdown for screen refreshing. Use the file in schedule.wpi in the [Witty Pi folder](/hardware/Witty%20Pi%204%20L3V7/) or copy this:
+
+```sh
+BEGIN 2024-09-01 07:00:00
+# Will not end (or at least in the following 40 years)
+END   2064-09-01 07:15:00
+#Will stay on 20 minutes (the displayRun.py has a timeout of 10 minutes for a network connection retry)
+ON    M20
+#Will startup in about 6 hours (H6) in production.
+OFF   H5 M40
+# For testing, allowing less time between boots, you can use the following line (after commenting the previous)
+#OFF	M15
+```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 

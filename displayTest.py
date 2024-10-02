@@ -23,8 +23,8 @@ try:
     epd.init()
     epd.Clear()
 
-    image = Image.open(os.path.join(pictureDict, 'Weihnachsbaum-b.bmp'))
-    image_red = Image.open(os.path.join(pictureDict, 'Weihnachsbaum-r.bmp'))
+    image = Image.open(os.path.join(pictureDict, 'ChristmasTree-b.bmp'))
+    image_red = Image.open(os.path.join(pictureDict, 'ChristmasTree-r.bmp'))
     epd.display(epd.getbuffer(image), epd.getbuffer(image_red))
     time.sleep(10)
 

@@ -1,10 +1,47 @@
 LOCALE = "de_DE"
 
-WEBDAV_CALENDAR_URL = "webcal://..."
-WEBDAV_IS_APPLE = True
+WEBDAV_CALENDAR_URLS = [
+	{
+	"url": "webcal://...",
+	"calendar_name": "a name",
+	"is_apple": True
+	},
+	{
+	"url": "webcal://...2",
+	"calendar_name": "a name2",
+	"is_apple": True
+	},
+]
 
 CALDAV_CONTACT_URL = "https://..."
 CALDAV_CONTACT_USER = "username"
 CALDAV_CONTACT_PWD = "passw0rd"
 
 ROTATE_IMAGE = True
+
+#Aperture Science Decorations
+APERTURE_DECORATIONS = True
+
+#True if the first day of the week is sunday. False to be Monday
+FIRST_WEEKDAY_IS_SUNDAY = True
+
+#For accessing the weather please go to tomorrow.io register for a free account and insert the key here. Empty or commented so to not show the weather.
+TOMORROWIO_API_KEY = "[insert api key here]"
+
+#Location for weather forecast.
+#A latitude-longitude pair of numbers according to ISO 6709, separated by , in query parameters
+#See also https://docs.tomorrow.io/reference/api-formats#locations
+#Sample is for Hamburg DE
+WEATHER_LOCATION = "53.551086,9.993682"
+
+#Temperature Units (can be C for Celsius or F for Fahrenheit), the default is C
+TEMPERATURE_UNIT = "C"
+
+#Will show a random quotes on the bottom of the screen 
+SHOW_QUOTES = True
+
+#Voltage were the device should notify for a recharge (consult your battery datasheet).
+RECHARGE_VOlTAGE = 3.5
+
+#Debug mode. It will write to disk the image and not to the screen.
+DEBUG = False

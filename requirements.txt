@@ -1,7 +1,15 @@
 icalevents
+holidays
 numpy
 vobject
 lxml
 schedule
 Pillow
 requests
+pigpio
+RPi.GPIO
+lgpio
+gpiozero
+spidev
+requests
+smbus2

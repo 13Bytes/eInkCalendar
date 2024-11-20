@@ -9,3 +9,5 @@ EXPORT-red.bmp
 settings.py
 info.log
 eInk_env/*
+venv/*
+

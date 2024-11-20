@@ -1,0 +1,4 @@
+[submodule "submodules/waveshare_e-paper"]
+	path = submodules/waveshare_e-paper
+	url = https://github.com/waveshareteam/e-Paper
+	fetchrecursesubmodules = true

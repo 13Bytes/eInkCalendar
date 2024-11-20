@@ -1,0 +1,9 @@
+BEGIN 2024-09-01 07:00:00
+# Will not end (or at least in the following 40 years)
+END   2064-09-01 07:15:00
+#Will stay on 20 minutes (the displayRun.py has a timeout of 10 minutes for a network connection retry)
+ON    M20
+#Will startup in about 6 hours (H6) in production.
+OFF   H5 M40
+# For testing, allowing less time between boots you can use the following line (after commenting the previous)
+#OFF	M15
